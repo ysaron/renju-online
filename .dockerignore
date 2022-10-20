@@ -1,0 +1,8 @@
+dev.env
+prod.env
+.env
+.env.dev
+.env.prod
+venv
+docker-compose.yml
+.pytest_cache
