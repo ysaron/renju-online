@@ -42,6 +42,7 @@ class Game(UuidIdMixin, Base):
     created_at = Column(DateTime(timezone=True), default=func.now())
     started_at = Column(DateTime(timezone=True))
     finished_at = Column(DateTime(timezone=True))
+    is_private = Column(Boolean, default=False)
 
     # One To One (GameResult)
     result = relationship('GameResult', back_populates='game', uselist=False)
