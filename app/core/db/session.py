@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base, declared_attr
 
 from app.config import config
 
@@ -10,4 +9,11 @@ engine = create_async_engine(DB_URL, future=True)
 
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-Base = declarative_base()
+
+class Base:
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+
+Base = declarative_base(cls=Base)

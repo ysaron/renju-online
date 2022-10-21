@@ -9,6 +9,8 @@ services:
     command: python main.py
     ports:
       - "8000:8000"
+    volumes:
+      - migrations_dev:/usr/src/back/migrations/versions/
     env_file:
       - .env.dev
     depends_on:
@@ -43,6 +45,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  migrations_dev:
   pgdata_dev:
   pgadmin_dev:
   redis_dev:
