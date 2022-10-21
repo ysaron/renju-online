@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from .core.users.manager import fa_users, auth_backend
 from .schemas.user import UserRead, UserCreate, UserUpdate
+from .api.endpoints.common import router as common_router
 
 
 routes = APIRouter()
@@ -29,4 +30,9 @@ routes.include_router(
     fa_users.get_users_router(UserRead, UserUpdate, requires_verification=True),
     prefix='/users',
     tags=['users'],
+)
+
+routes.include_router(
+    common_router,
+    tags=['games'],
 )

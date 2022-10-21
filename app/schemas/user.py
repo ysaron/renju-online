@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi_users.schemas import BaseUser, BaseUserCreate, BaseUserUpdate
+from pydantic import BaseModel
 
 
 class UserRead(BaseUser[uuid.UUID]):
@@ -14,4 +15,9 @@ class UserCreate(BaseUserCreate):
 
 
 class UserUpdate(BaseUserUpdate):
+    name: str
+
+
+class UserSchema(BaseModel):
+    id: uuid.UUID
     name: str

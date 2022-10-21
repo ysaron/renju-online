@@ -4,8 +4,8 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.dialects import postgresql as psql
 
 from app.core.db.session import Base
+from app.enums.game import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
 from .mixins import UuidIdMixin
-from .enums import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
 
 
 game_mode_m2m = Table(
@@ -53,6 +53,11 @@ class Game(UuidIdMixin, Base):
     # One to many (Move)
     moves = relationship('Move', back_populates='game')
 
+    time_limit = Column(Integer)
+    board_size = Column(Integer, default=19)
+    classic_mode = Column(Boolean, default=False)
+    with_myself = Column(Boolean, default=False)
+
 
 class GameResult(Base):
     id = Column(Integer, primary_key=True)
@@ -62,6 +67,10 @@ class GameResult(Base):
     # One To One (Game)
     game_id = Column(psql.UUID, ForeignKey('game.id'))
     game = relationship('Game', back_populates='result')
+
+    # Many to One (User)
+    winner_id = Column(psql.UUID, ForeignKey('user.id'))
+    winner = relationship('User', back_populates='victories')
 
 
 class GameMode(Base):
