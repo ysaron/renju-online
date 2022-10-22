@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Timeless",
+    "time_limit": 0
+  },
+  {
+    "id": 2,
+    "name": "Rapid",
+    "time_limit": 600
+  },
+  {
+    "id": 3,
+    "name": "With Myself",
+    "with_myself": true
+  },
+  {
+    "id": 4,
+    "name": "Big Board",
+    "board_size": 30
+  }
+]

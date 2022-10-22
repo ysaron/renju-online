@@ -76,10 +76,10 @@ class GameResult(Base):
 class GameMode(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(40), unique=True)
-    time_limit = Column(Integer)
-    board_size = Column(Integer)
-    classic_mode = Column(Boolean)
-    with_myself = Column(Boolean)
+    time_limit = Column(Integer, default=None)
+    board_size = Column(Integer, default=None)
+    classic_mode = Column(Boolean, default=None)
+    with_myself = Column(Boolean, default=None)
 
     # m2m (Game)
     games = relationship('Game', secondary=game_mode_m2m, back_populates='modes')

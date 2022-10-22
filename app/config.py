@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from pydantic import BaseSettings, EmailStr
 
@@ -6,6 +7,7 @@ from pydantic import BaseSettings, EmailStr
 class Config(BaseSettings):
     ENV: str = 'dev'
     DEBUG: bool = True
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent
     APP_HOST: str = 'localhost'
     APP_PORT: int = 8000
     POSTGRES_USER: str = 'user'

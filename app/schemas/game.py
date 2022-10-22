@@ -23,7 +23,7 @@ class GameBaseSchema(BaseModel):
 class GameModeSchema(GameModelBaseSchema):
     id: int
 
-    time_limit: int | None = Field(None, ge=60, le=1200, description='Время, отведенное игрокам на ходы (с)')
+    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool | None = Field(None, description='Включить классические правила рэндзю')
     with_myself: bool | None = Field(None, description='Игра с самим собой')
@@ -34,7 +34,8 @@ class GameModeInGameSchema(GameModelBaseSchema):
 
 
 class GameModeCreateSchema(GameModelBaseSchema):
-    time_limit: int | None = Field(None, ge=60, le=1200, description='Время, отведенное игрокам на ходы (с)')
+    id: int
+    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool | None = Field(None, description='Включить классические правила рэндзю')
     with_myself: bool | None = Field(None, description='Игра с самим собой')
@@ -85,7 +86,7 @@ class GameSchema(GameCreateSchema):
     finished_at: datetime | None = None
     result: ResultSchema | None = None
     moves: list[MoveSchema]
-    time_limit: int | None = Field(None, ge=60, le=1200, description='Время, отведенное игрокам на ходы (с)')
+    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
     with_myself: bool = Field(..., description='Игра с самим собой')
@@ -95,7 +96,7 @@ class GameAvailableListSchema(GameBaseSchema):
     id: uuid.UUID
     players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
     created_at: datetime
-    time_limit: int | None = Field(None, ge=60, le=1200, description='Время, отведенное игрокам на ходы (с)')
+    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
     with_myself: bool = Field(..., description='Игра с самим собой')
