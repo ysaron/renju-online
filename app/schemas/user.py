@@ -21,3 +21,6 @@ class UserUpdate(BaseUserUpdate):
 class UserSchema(BaseModel):
     id: uuid.UUID
     name: str
+
+    class Config:
+        orm_mode = True

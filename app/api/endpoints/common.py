@@ -10,32 +10,38 @@ from app.schemas.game import (
     GameModeInGameSchema,
     GameModeCreateSchema,
     GameJoinSchema,
+    GameCreateSchema,
+    GameSchema,
 )
+from app.api.services import games as game_services
 
 router = APIRouter()
 current_user = fa_users.current_user(active=True, verified=True)
 
 
-@router.get('/games/create')
+@router.get(
+    '/games/create',
+    response_model=list[GameModeSchema],
+    response_model_exclude_none=True,
+    description='Получить список доступных режимов игры, чтобы создать игру',
+)
 async def read_game_modes(
         user: User = Depends(current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    # --- Получаем список всех GameMode и возвращаем ---
-    # --- response_model=list[GameModeSchema] с exclude_unset ---
-    return {'hello': f'Hi, {user.name}', 'resp': 'No game modes exist yet'}
+    modes = await game_services.get_game_modes(db)
+    return modes
 
 
-@router.post('/games/create')
+@router.post('/games/create', response_model=GameSchema, description='Создание новой игры')
 async def create_new_game(
         *,
         user: User = Depends(current_user),
         db: AsyncSession = Depends(get_async_session),
-        modes: list[GameModeInGameSchema],
+        game: GameCreateSchema,
 ):
-    # --- Создаем новый экземпляр Game и возвращаем ---
-    # --- response_model=GameSchema ---
-    return {'hello': f'Hi, {user.name}', 'resp': 'Game is not created yet'}
+    game = await game_services.create_game(db, user=user, game_data=game)
+    return game
 
 
 @router.get('/games')

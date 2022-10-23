@@ -11,8 +11,8 @@ from .mixins import UuidIdMixin
 game_mode_m2m = Table(
     'game_mode_m2m',
     Base.metadata,
-    Column('game_id', ForeignKey('game.id'), primary_key=True),
-    Column('gamemode_id', ForeignKey('gamemode.id'), primary_key=True),
+    Column('game_id', ForeignKey('game.id', ondelete='CASCADE'), primary_key=True),
+    Column('gamemode_id', ForeignKey('gamemode.id', ondelete='CASCADE'), primary_key=True),
 )
 
 
@@ -22,21 +22,21 @@ class PlayerRole(Base):
 
     https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html#association-object
     """
-    player_id = Column(psql.UUID, ForeignKey('user.id'), primary_key=True)
-    game_id = Column(psql.UUID, ForeignKey('game.id'), primary_key=True)
+    player_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'), primary_key=True)
     role = Column(
         Enum(PlayerRoleEnum, values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
         default=PlayerRoleEnum.first.value,
     )
 
-    game = relationship('Game', back_populates='players')
-    player = relationship('User', back_populates='games')
+    game = relationship('Game', back_populates='players', lazy='selectin')
+    player = relationship('User', back_populates='games', lazy='selectin')
 
 
 class Game(UuidIdMixin, Base):
     # m2m (User)
-    players = relationship('PlayerRole', back_populates='game')
+    players = relationship('PlayerRole', back_populates='game', lazy='selectin')
 
     state = Column(Enum(GameStateEnum), nullable=False, default=GameStateEnum.created)
     created_at = Column(DateTime(timezone=True), default=func.now())
@@ -45,13 +45,13 @@ class Game(UuidIdMixin, Base):
     is_private = Column(Boolean, default=False)
 
     # One To One (GameResult)
-    result = relationship('GameResult', back_populates='game', uselist=False)
+    result = relationship('GameResult', back_populates='game', uselist=False, lazy='selectin')
 
     # m2m (GameMode)
-    modes = relationship('GameMode', secondary=game_mode_m2m, back_populates='games')
+    modes = relationship('GameMode', secondary=game_mode_m2m, back_populates='games', lazy='selectin')
 
     # One to many (Move)
-    moves = relationship('Move', back_populates='game')
+    moves = relationship('Move', back_populates='game', lazy='selectin')
 
     time_limit = Column(Integer)
     board_size = Column(Integer, default=19)
@@ -65,12 +65,12 @@ class GameResult(Base):
     cause = Column(Enum(GameResultCauseEnum))
 
     # One To One (Game)
-    game_id = Column(psql.UUID, ForeignKey('game.id'))
-    game = relationship('Game', back_populates='result')
+    game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
+    game = relationship('Game', back_populates='result', lazy='selectin')
 
     # Many to One (User)
-    winner_id = Column(psql.UUID, ForeignKey('user.id'))
-    winner = relationship('User', back_populates='victories')
+    winner_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
+    winner = relationship('User', back_populates='victories', lazy='selectin')
 
 
 class GameMode(Base):
@@ -82,19 +82,19 @@ class GameMode(Base):
     with_myself = Column(Boolean, default=None)
 
     # m2m (Game)
-    games = relationship('Game', secondary=game_mode_m2m, back_populates='modes')
+    games = relationship('Game', secondary=game_mode_m2m, back_populates='modes', lazy='selectin')
 
 
 class Move(Base):
     id = Column(Integer, primary_key=True)
 
     # Many to One (Game)
-    game_id = Column(psql.UUID, ForeignKey('game.id'))
-    game = relationship('Game', back_populates='moves')
+    game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
+    game = relationship('Game', back_populates='moves', lazy='selectin')
 
     # Many to One (User)
-    player_id = Column(psql.UUID, ForeignKey('user.id'))
-    player = relationship('User', back_populates='moves')
+    player_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
+    player = relationship('User', back_populates='moves', lazy='selectin')
 
     x_coord = Column(SmallInteger)
     y_coord = Column(SmallInteger)

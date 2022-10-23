@@ -7,7 +7,7 @@ from .user import UserSchema
 from app.enums.game import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
 
 
-class GameModelBaseSchema(BaseModel):
+class GameModeBaseSchema(BaseModel):
     name: str = Field(..., max_length=40, description='Название режима игры')
 
     class Config:
@@ -20,7 +20,7 @@ class GameBaseSchema(BaseModel):
         orm_mode = True
 
 
-class GameModeSchema(GameModelBaseSchema):
+class GameModeSchema(GameModeBaseSchema):
     id: int
 
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
@@ -29,11 +29,11 @@ class GameModeSchema(GameModelBaseSchema):
     with_myself: bool | None = Field(None, description='Игра с самим собой')
 
 
-class GameModeInGameSchema(GameModelBaseSchema):
+class GameModeInGameSchema(GameModeBaseSchema):
     id: int
 
 
-class GameModeCreateSchema(GameModelBaseSchema):
+class GameModeCreateSchema(GameModeBaseSchema):
     id: int
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
@@ -73,7 +73,6 @@ class GameJoinSchema(GameBaseSchema):
 
 
 class GameCreateSchema(GameBaseSchema):
-    players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
     is_private: bool = Field(..., description='Если True - доступна только по ссылке')
     modes: list[GameModeInGameSchema]
 
@@ -81,6 +80,7 @@ class GameCreateSchema(GameBaseSchema):
 class GameSchema(GameCreateSchema):
     id: uuid.UUID
     state: GameStateEnum
+    players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
     created_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
