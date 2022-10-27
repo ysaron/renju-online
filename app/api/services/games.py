@@ -1,11 +1,11 @@
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.game import GameMode, Game, GameResult, PlayerRole, Move
 from app.models.user import User
 from app.schemas.game import GameModeInGameSchema, GameCreateSchema
-from app.enums.game import PlayerRoleEnum
+from app.enums.game import PlayerRoleEnum, GameStateEnum
 
 
 async def get_game_modes(db: AsyncSession, pk_list: list | None = None) -> list[GameMode]:
@@ -64,4 +64,15 @@ async def _define_game_rules(modes: list[GameMode]):
             rules['with_myself'] = mode.with_myself
 
     return rules
+
+
+async def get_public_games(db: AsyncSession) -> list[Game]:
+    stmt = select(Game).where(and_(
+        Game.state == GameStateEnum.created,
+        ~Game.with_myself,
+        ~Game.is_private,
+    ))
+    public_games = await db.scalars(stmt)
+    return public_games.all()
+
 

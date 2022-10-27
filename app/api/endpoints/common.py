@@ -12,6 +12,7 @@ from app.schemas.game import (
     GameJoinSchema,
     GameCreateSchema,
     GameSchema,
+    GameAvailableListSchema,
 )
 from app.api.services import games as game_services
 
@@ -44,14 +45,17 @@ async def create_new_game(
     return game
 
 
-@router.get('/games')
+@router.get(
+    '/games',
+    response_model=list[GameAvailableListSchema],
+    description='Получить список игр, к которым можно присоединиться',
+)
 async def read_public_games(
         user: User = Depends(current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    # --- Возвращаем все Game с state=created, with_myself=False, is_private=False
-    # --- response_model=list[GameAvailableListSchema] ---
-    return {'hello': f'Hi, {user.name}', 'resp': 'No available games'}
+    public_games = await game_services.get_public_games(db)
+    return public_games
 
 
 @router.get('/games/mine')
@@ -62,37 +66,3 @@ async def read_my_finished_games(
     # --- Возвращаем все Game с state=finished, user in get_players(game)
     # --- response_model=list[GameFinishedListSchema] ---
     return {'hello': f'Hi, {user.name}', 'resp': f'You are not finished any game yet'}
-
-
-@router.patch('/games/{game_id}')
-async def join_game(
-        *,
-        user: User = Depends(current_user),
-        db: AsyncSession = Depends(get_async_session),
-        game_id: UUID,
-):
-    # --- Добавляем текущего юзера к Game по ID ---
-    return {'hello': f'Hi, {user.name}', 'resp': 'No game to join'}
-
-
-@router.post('/games/{game_id}/surrender')
-async def surrender(
-        *,
-        user: User = Depends(current_user),
-        db: AsyncSession = Depends(get_async_session),
-        game_id: UUID,
-):
-    # --- текущий юзер проигрывает. Запускается процесс завершения игры ---
-    return {'hello': f'Hi, {user.name}', 'resp': f'Cannot lose in game {game_id}'}
-
-
-@router.get('/games/{game_id}/open')
-async def open_game(
-        *,
-        user: User = Depends(current_user),
-        db: AsyncSession = Depends(get_async_session),
-        game_id: UUID,
-):
-    # --- if user in get_players(game) AND game.state in [created, started]: ---
-    # --- открываем окно игры, дальше - вебсокеты ---
-    return {'hello': f'Hi, {user.name}', 'resp': f'Try to open game {game_id}'}
