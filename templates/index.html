@@ -14,7 +14,29 @@
      data-port="{{ app_port }}"
      style="display: none;"></div>
 
-<div id="game" class="container-game">
+<div id="main" class="container">
+  <div id="mainscreen-not-logged" class="screen screen-main">
+    <div class=""><h1>Renju v1.0</h1></div>
+    <div class="btn-group">
+      <button type="button" class="btn btn-large login">Login</button>
+      <button type="button" class="btn btn-large signup">Signup</button>
+    </div>
+  </div>
+  <div id="mainscreen-logged" class="screen screen-main">
+    <div class=""><h1>Renju v1.0</h1></div>
+    <div class="btn-group">
+      <button type="button" class="btn btn-large">Hi, <span class="span-username"></span>!</button>
+      <button type="button" class="btn btn-large logout">Logout</button>
+    </div>
+    <div class="btn-group">
+      <button type="button" class="btn btn-large btn-create-game">Create</button>
+      <button type="button" class="btn btn-large btn-join-game">Join</button>
+      <button type="button" class="btn btn-large btn-my-stats">Statistics</button>
+    </div>
+  </div>
+</div>
+
+<div id="game" class="container-game" style="display: none;">
   <div class="item">
     <button class="btn login">Login</button>
     <button class="btn signup">Signup</button>

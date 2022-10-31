@@ -1,3 +1,7 @@
+const mainContainer = document.getElementById("main")
+const screenMainNotLogged = document.getElementById("mainscreen-not-logged")
+const screenMainLogged = document.getElementById("mainscreen-logged")
+
 const modalSignup = document.getElementById("modal-signup")
 const modalLogin = document.getElementById("modal-login")
 const modalRequestVerification = document.getElementById("modal-request-verify")
@@ -30,10 +34,15 @@ document.addEventListener("DOMContentLoaded", function() {
 //    console.log(sessionStorage.getItem('username'));
     if (sessionStorage.getItem('token') && sessionStorage.getItem('username')) {
         let username = sessionStorage.getItem('username');
-        hideLoginSignup();
-        showBtnMyStat();
+//        hideLoginSignup();
+//        showBtnMyStat();
         showUsername(username);
-        showLogout();
+        hideAllScreens();
+        screenMainLoggedShow();
+//        showLogout();
+    } else {
+        hideAllScreens();
+        screenMainNotLoggedShow();
     }
 });
 
@@ -88,6 +97,28 @@ function getErrorInfo(response) {
         default:
             return humanizeError(response.detail)
     }
+}
+
+function hideAllScreens() {
+    for (const child of mainContainer.children) {
+        child.style.display = 'none';
+    }
+}
+
+function screenMainNotLoggedShow() {
+    screenMainNotLogged.style.display = "flex"
+}
+
+function screenMainNotLoggedHide() {
+    screenMainNotLogged.style.display = "none"
+}
+
+function screenMainLoggedShow() {
+    screenMainLogged.style.display = "flex"
+}
+
+function screenMainLoggedHide() {
+    screenMainLogged.style.display = "none"
 }
 
 function modalSignupOpen() {
@@ -386,9 +417,11 @@ function sendFormLogin(event) {
 
             sessionStorage.setItem('token', response.access_token)
 
-            showLogout()
-            showBtnMyStat()
-            hideLoginSignup()
+            screenMainNotLoggedHide();
+            screenMainLoggedShow();
+//            showLogout()
+//            showBtnMyStat()
+//            hideLoginSignup()
             modalLoginClose()
         })
         .catch(response => response.json().then(response => {
@@ -468,10 +501,13 @@ function sendFormResetPassword(event) {
 function logout() {
     sessionStorage.removeItem("token")
     sessionStorage.removeItem("username")
-    hideLogout()
-    hideBtnMyStat()
-    hideUsername()
-    showLoginSignup()
+
+    screenMainLoggedHide();
+    screenMainNotLoggedShow();
+//    hideLogout()
+//    hideBtnMyStat()
+//    hideUsername()
+//    showLoginSignup()
     closeWS()
     start()
 }
