@@ -8,8 +8,10 @@ class Config(BaseSettings):
     ENV: str = 'dev'
     DEBUG: bool = True
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
-    APP_HOST: str = 'localhost'
+    APP_HOST: str = 'localhost'     # хост в Docker
+    REMOTE_HOST: str = 'localhost'  # хост для доступа извне
     APP_PORT: int = 8000
+    CORS_ALLOWED_ORIGINS: str
     POSTGRES_USER: str = 'user'
     POSTGRES_PASSWORD: str = 'password'
     POSTGRES_PORT: str = 5432

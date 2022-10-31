@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from .core.users.manager import fa_users, auth_backend
 from .schemas.user import UserRead, UserCreate, UserUpdate
 from .api.endpoints.common import router as common_router
+from .api.endpoints.home import router as home_router
 
 
 routes = APIRouter()
@@ -36,3 +37,5 @@ routes.include_router(
     common_router,
     tags=['games'],
 )
+
+routes.include_router(home_router, tags=['home'])

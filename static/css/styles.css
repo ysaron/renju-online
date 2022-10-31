@@ -1,0 +1,304 @@
+:root {
+    --dark: #282828;
+    --blue: #000099;
+    --green: #009900;
+}
+
+body {
+    background:
+    radial-gradient(black 15%, transparent 17%) 0 0,
+    radial-gradient(black 15%, transparent 17%) 8px 8px,
+    radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+    radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+    background-color: var(--dark);
+    background-size: 16px 16px;
+
+    font-family: monospace;
+    color: white;
+    font-size: 19px;
+    line-height: 24px;
+}
+
+button {
+    font-family: monospace;
+    color: var(--blue);
+    font-size: 19px;
+    border: 2px solid white;
+    border-radius: 10px;
+}
+
+section {
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+h4 {
+    font-size: 24px;
+    margin: 30px 0;
+    padding: 0 15px;
+    text-align: center;
+}
+
+li {
+    margin: 0 0 16px 20px;
+}
+
+input[type=text], input[type=password], input[type=email] {
+    border: 1px solid white;
+    border-radius: 5px;
+    padding-left: 5px;
+    justify-content: end;
+    height: 20px;
+    font-family: monospace;
+    color: var(--dark);
+    font-size: 19px;
+    line-height: 24px;
+    font-style: italic;
+    background-color: #e6e6e6;
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
+    outline: 2px solid white;
+    background-color: white;
+}
+
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 306px;
+    margin: 50px auto;
+}
+
+.container-game {
+    display: grid;
+    grid-template-columns: 100px 200px 100px 100px;
+    width: 300px;
+    justify-content: center;
+    margin: 50px auto;
+    border-left-color: #333333;
+    border-right-color: #333333;
+    border-left-style: solid;
+    border-right-style: solid;
+}
+
+.container-list-game {
+    grid-column: 2/4;
+    width: 100%;
+}
+
+.item {
+    border-bottom-color: #333333;
+    border-bottom-style: solid;
+}
+
+.item-title {
+    grid-column: 2/4;
+    width: 100%;
+    border-bottom-color: #333333;
+    border-bottom-style: solid
+}
+
+.item-h4 {
+    text-align: center;
+    font-size: 26px;
+    margin: 27px 0 10px 0;
+}
+
+.game-list-title {
+    grid-column: 2/4;
+    width: 100%;
+    border-bottom-color: #333333;
+    border-bottom-style: solid
+}
+
+.cell {
+    font-family: "Georgia", cursive;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #333333;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px #333333;
+    font-size: 70px;
+    line-height: 100px;
+}
+
+.game-on {
+    display: block;
+}
+
+.game-off {
+    display: none;
+}
+
+.btn {
+    margin: 10px 15px 0 0;
+    color: white;
+    background-color: var(--blue);
+    align-self: center;
+}
+
+.btn:hover {
+    background-color: white;
+    color: var(--blue);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:active {
+    opacity: 0.6;
+}
+
+.btn-join {
+    margin: 0 10px 0 40px;
+    color: white;
+    background-color: var(--blue);
+    border: 0;
+    align-self: center;
+    width: 100px;
+}
+
+.btn-join:hover {
+    background-color: white;
+    color: var(--blue);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-join:active {
+    opacity: 0.6;
+}
+
+.btn-join:disabled {
+    background-color: #b22222;
+    pointer-events: none;
+}
+
+.users-online {
+    padding: 10px 10px;
+    text-align: center;
+    color: var(--green);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background:
+    radial-gradient(var(--dark) 15%, transparent 17%) 0 0,
+    radial-gradient(var(--dark) 15%, transparent 17%) 8px 8px,
+    radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+    radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+    background-color: #666666;
+    background-size: 16px 16px;
+
+    font-family: monospace;
+    color: white;
+    font-size: 19px;
+    line-height: 24px;
+    font-style: italic;
+
+    margin: auto;
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 10px;
+}
+
+.auth {
+    width: 320px;
+}
+
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-signup, .form-login, .form-verify, .form-request-verify, .form-forgot-password, .form-reset-password {
+    display: grid;
+    grid-template-columns: 280px;
+    grid-template-rows: 40px 40px 40px 40px 40px;
+    width: 300px;
+    justify-content: center;
+    margin: 40px auto;
+}
+
+.btn-signup, .btn-login, .btn-verify, .btn-forgot-password, .btn-reset-password {
+    width: 100%;
+}
+
+.logout {
+    display: none;
+    margin-bottom: 15px;
+}
+
+.request-verify {
+    display: none;
+    width: 100%;
+}
+
+.forgot-password {
+    width: 100%;
+}
+
+.btn-top {
+    margin-top: 16px;
+}
+
+.btn-myStat {
+    display: none;
+    width: 90px;
+    margin-top: 16px;
+}
+
+.modal-top, .modal-myStat {
+    width: 520px;
+}
+
+.wrapper-top-title {
+    display: grid;
+    margin: 0 0 0 20px;
+    grid-template-columns: 60px 200px 60px 60px 60px;
+    grid-template-rows: 40px;
+}
+
+.wrapper-top {
+    display: grid;
+    margin: 0 0 0 20px;
+    grid-template-columns: 60px 200px 60px 60px 60px;
+    grid-template-rows: repeat(10, 40px);
+}
+
+.wrapper-myStat {
+    display: grid;
+    margin: 0 0 0 20px;
+    grid-template-columns: 60px 200px 60px 60px 60px;
+    grid-template-rows: repeat(2, 40px);
+}
+
+.column {
+    border: 1px solid silver;
+    text-align: center;
+    font-size: 22px;
+}
