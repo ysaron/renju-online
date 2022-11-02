@@ -5,6 +5,7 @@ class PlayerRoleEnum(enum.Enum):
     first = '1'
     second = '2'
     third = '3'
+    spectator = '4'
 
 
 class GameStateEnum(enum.Enum):

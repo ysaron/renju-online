@@ -29,6 +29,7 @@ class PlayerRole(Base):
         nullable=False,
         default=PlayerRoleEnum.first.value,
     )
+    ready = Column(Boolean, default=False)
 
     game = relationship('Game', back_populates='players', lazy='selectin')
     player = relationship('User', back_populates='games', lazy='selectin')
@@ -57,6 +58,7 @@ class Game(UuidIdMixin, Base):
     board_size = Column(Integer, default=19)
     classic_mode = Column(Boolean, default=False)
     with_myself = Column(Boolean, default=False)
+    three_players = Column(Boolean, default=False)
 
 
 class GameResult(Base):
@@ -80,6 +82,8 @@ class GameMode(Base):
     board_size = Column(Integer, default=None)
     classic_mode = Column(Boolean, default=None)
     with_myself = Column(Boolean, default=None)
+    three_players = Column(Boolean, default=None)
+    is_active = Column(Boolean, default=False)
 
     # m2m (Game)
     games = relationship('Game', secondary=game_mode_m2m, back_populates='modes', lazy='selectin')

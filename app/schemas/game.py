@@ -27,6 +27,8 @@ class GameModeSchema(GameModeBaseSchema):
     board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool | None = Field(None, description='Включить классические правила рэндзю')
     with_myself: bool | None = Field(None, description='Игра с самим собой')
+    three_players: bool | None = Field(None, description='Три игрока (каждый против каждого)')
+    is_active: bool = Field(False, description='Доступен ли мод для игры')
 
 
 class GameModeInGameSchema(GameModeBaseSchema):
@@ -44,6 +46,7 @@ class GameModeCreateSchema(GameModeBaseSchema):
 class PlayerRoleSchema(BaseModel):
     player: UserSchema
     role: PlayerRoleEnum
+    ready: bool = False
 
     class Config:
         orm_mode = True
@@ -89,6 +92,7 @@ class GameSchema(GameCreateSchema):
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
+    three_players: bool = Field(..., description='Три игрока (каждый против каждого)')
     with_myself: bool = Field(..., description='Игра с самим собой')
 
 

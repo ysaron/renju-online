@@ -2,21 +2,32 @@
   {
     "id": 1,
     "name": "Timeless",
+    "is_active": true,
     "time_limit": 0
   },
   {
     "id": 2,
     "name": "Rapid",
+    "is_active": false,
     "time_limit": 600
   },
   {
     "id": 3,
     "name": "With Myself",
+    "is_active": true,
     "with_myself": true
   },
   {
     "id": 4,
     "name": "Big Board",
+    "is_active": false,
+    "board_size": 30
+  },
+  {
+    "id": 5,
+    "name": "Trinity",
+    "is_active": false,
+    "three_players": true,
     "board_size": 30
   }
 ]

@@ -47,6 +47,7 @@ async def _define_game_rules(modes: list[GameMode]):
         'board_size': 15,
         'classic_mode': False,
         'with_myself': False,
+        'three_players': False,
     }
     for mode in modes:
         if mode.time_limit == 0:
