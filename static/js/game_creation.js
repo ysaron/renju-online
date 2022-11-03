@@ -1,6 +1,9 @@
 const modeList = document.getElementById("mode-list")
 const ruleList = document.getElementById("rule-list")
 
+const modesLoader = document.getElementById("modes-loader")
+const rulesLoader = document.getElementById("rules-loader")
+
 btnCreateGame.addEventListener("click", startGameCreation)
 
 formCreateGame.addEventListener("submit", sendFormCreateGame)
@@ -12,6 +15,8 @@ function showScreenGameCreation() {
 
 function startGameCreation() {
     showScreenGameCreation();
+    modesLoader.style.display = "inline-block";
+    rulesLoader.style.display = "inline-block";
     let token = getToken();
     fetch(`${origin}/modes`, {
         method: "GET",
@@ -30,12 +35,19 @@ function startGameCreation() {
         .then(response => {
             // response = {modes: array, rules: obj}
             addGameModeList(response.modes);
+            modesLoader.style.display = "none";
+
             updateCurrentRules(response.rules);
+            rulesLoader.style.display = "none";
         })
         .catch(response => response.json().then(response => {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            modesLoader.style.display = "none";
+            rulesLoader.style.display = "none";
+        })
 }
 
 function addGameModeList(modes) {
