@@ -20,6 +20,14 @@ class GameBaseSchema(BaseModel):
         orm_mode = True
 
 
+class GameRules(BaseModel):
+    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
+    board_size: int | None = Field(15, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
+    classic_mode: bool | None = Field(False, description='Включить классические правила рэндзю')
+    with_myself: bool | None = Field(False, description='Игра с самим собой')
+    three_players: bool | None = Field(False, description='Три игрока (каждый против каждого)')
+
+
 class GameModeSchema(GameModeBaseSchema):
     id: int
 
@@ -33,14 +41,6 @@ class GameModeSchema(GameModeBaseSchema):
 
 class GameModeInGameSchema(GameModeBaseSchema):
     id: int
-
-
-class GameModeCreateSchema(GameModeBaseSchema):
-    id: int
-    time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
-    board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
-    classic_mode: bool | None = Field(None, description='Включить классические правила рэндзю')
-    with_myself: bool | None = Field(None, description='Игра с самим собой')
 
 
 class PlayerRoleSchema(BaseModel):
@@ -76,7 +76,7 @@ class GameJoinSchema(GameBaseSchema):
 
 
 class GameCreateSchema(GameBaseSchema):
-    is_private: bool = Field(..., description='Если True - доступна только по ссылке')
+    is_private: bool = Field(False, description='Если True - доступна только по ссылке')
     modes: list[GameModeInGameSchema]
 
 
@@ -110,3 +110,8 @@ class GameFinishedListSchema(GameAvailableListSchema):
     started_at: datetime
     finished_at: datetime
     result: ResultSchema
+
+
+class ModesAndRules(BaseModel):
+    modes: list[GameModeSchema]
+    rules: GameRules

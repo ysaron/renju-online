@@ -13,20 +13,20 @@
   },
   {
     "id": 3,
-    "name": "With Myself",
+    "name": "Standalone",
     "is_active": true,
     "with_myself": true
   },
   {
     "id": 4,
     "name": "Big Board",
-    "is_active": false,
+    "is_active": true,
     "board_size": 30
   },
   {
     "id": 5,
     "name": "Trinity",
-    "is_active": false,
+    "is_active": true,
     "three_players": true,
     "board_size": 30
   }

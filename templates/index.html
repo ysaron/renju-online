@@ -17,21 +17,80 @@
 <div id="main" class="container">
   <div id="mainscreen-not-logged" class="screen screen-main">
     <div class=""><h1>Renju v1.0</h1></div>
-    <div class="btn-group">
+    <div class="section">
       <button type="button" class="btn btn-large login">Login</button>
       <button type="button" class="btn btn-large signup">Signup</button>
     </div>
   </div>
   <div id="mainscreen-logged" class="screen screen-main">
     <div class=""><h1>Renju v1.0</h1></div>
-    <div class="btn-group">
+    <div class="section">
       <button type="button" class="btn btn-large">Hi, <span class="span-username"></span>!</button>
       <button type="button" class="btn btn-large logout">Logout</button>
     </div>
-    <div class="btn-group">
+    <div class="section">
       <button type="button" class="btn btn-large btn-create-game">Create</button>
       <button type="button" class="btn btn-large btn-join-game">Join</button>
       <button type="button" class="btn btn-large btn-my-stats">Statistics</button>
+    </div>
+  </div>
+  <div id="game-creation" class="screen screen-game-creation">
+    <div class="section">
+      <div class="section section-vert"><button type="button" class="btn btn-icon btn-home">X</button></div>
+
+    </div>
+    <div class="section">
+      <div class="section section-vert" id="mode-list">
+        <h2>Modes</h2>
+<!--        <div class="mode-block">-->
+<!--          <div class="mode-name">Unset</div>-->
+<!--          <div class="mode-checkbox"></div>-->
+<!--          <div class="tooltip">-->
+<!--            <p>aaa</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="mode-block mode-set">-->
+<!--          <div class="mode-name">Set</div>-->
+<!--          <div class="mode-checkbox">&#10004;</div>-->
+<!--          <div class="tooltip">-->
+<!--            <p>aaa</p>-->
+<!--            <p>bbb</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="mode-block mode-inactive">-->
+<!--          <div class="mode-name">Inactive</div>-->
+<!--          <div class="mode-checkbox">&#10008;</div>-->
+<!--          <div class="tooltip">-->
+<!--            <p>aaa</p>-->
+<!--            <p>bbb</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="mode-block">-->
+<!--          <div class="mode-name">Mode2</div>-->
+<!--          <div class="mode-checkbox">&#10004;</div>-->
+<!--          <div class="tooltip">-->
+<!--            <p>bbb</p>-->
+<!--            <p>bwwwbb</p>-->
+<!--          </div>-->
+<!--        </div>-->
+      </div>
+      <div class="section section-vert">
+        <h2>Current rules</h2>
+        <ul id="rule-list">
+          <li>...</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section">
+      <form class="form-game-creation">
+        <div class="">
+          <input type="checkbox" name="is_private" id="game-is-private">
+          <label for="game-is-private"> Is Private</label>
+        </div>
+        <div class="">
+          <button type="submit" class="btn btn-large">Create</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -172,8 +231,10 @@
   </div>
 </div>
 
+<script src="{{ url_for('static', path='/js/main.js') }}"></script>
 <script src="{{ url_for('static', path='/js/auth.js') }}"></script>
-<script src="{{ url_for('static', path='/js/game.js') }}"></script>
+<script src="{{ url_for('static', path='/js/game_creation.js') }}"></script>
+<!--<script src="{{ url_for('static', path='/js/game.js') }}"></script>-->
 
 </body>
 </html>

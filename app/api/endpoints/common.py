@@ -8,11 +8,12 @@ from app.models.user import User
 from app.schemas.game import (
     GameModeSchema,
     GameModeInGameSchema,
-    GameModeCreateSchema,
     GameJoinSchema,
     GameCreateSchema,
     GameSchema,
     GameAvailableListSchema,
+    GameRules,
+    ModesAndRules,
 )
 from app.api.services import games as game_services
 
@@ -21,17 +22,27 @@ current_user = fa_users.current_user(active=True, verified=True)
 
 
 @router.get(
-    '/games/create',
-    response_model=list[GameModeSchema],
-    response_model_exclude_none=True,
+    '/modes',
+    response_model=ModesAndRules,
     description='Получить список доступных режимов игры, чтобы создать игру',
 )
 async def read_game_modes(
         user: User = Depends(current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    modes = await game_services.get_game_modes(db)
-    return modes
+    all_modes = await game_services.get_game_modes(db)
+    rules = await game_services.get_current_rules(db)
+    return ModesAndRules(modes=all_modes, rules=rules)
+
+
+@router.put('/modes', response_model=GameRules)
+async def update_rules(
+        *,
+        user: User = Depends(current_user),
+        db: AsyncSession = Depends(get_async_session),
+        modes: list[GameModeInGameSchema],
+):
+    return await game_services.get_current_rules(db, modes)
 
 
 @router.post('/games/create', response_model=GameSchema, description='Создание новой игры')

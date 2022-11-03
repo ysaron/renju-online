@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.dialects import postgresql as psql
 
 from app.core.db.utils import get_async_session
-from app.schemas.game import GameModeCreateSchema
+from app.schemas.game import GameModeSchema
 from app.models.game import GameMode
 from app.config import config
 
@@ -18,7 +18,7 @@ async def bulk_create_game_modes():
         with open(data_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        modes = [GameModeCreateSchema(**m) for m in data]
+        modes = [GameModeSchema(**m) for m in data]
 
         # Upsert: новые моды запишутся, существующие - обновятся
         insert_stmt = psql.insert(GameMode.__table__).values([m.dict() for m in modes])

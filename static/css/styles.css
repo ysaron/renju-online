@@ -2,6 +2,7 @@
     --dark: #282828;
     --blue: #000099;
     --green: #009900;
+    --red: #cc0000;
 }
 
 body {
@@ -14,7 +15,7 @@ body {
     background-size: 16px 16px;
 
     font-family: monospace;
-    color: white;
+    color: var(--dark);
     font-size: 19px;
     line-height: 24px;
 }
@@ -27,14 +28,15 @@ button {
     border-radius: 10px;
 }
 
-section {
-    text-align: center;
-}
-
 h1 {
     text-align: center;
     font-size: 80px;
     text-shadow: -2px -2px 5px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+    text-align: center;
+    text-shadow: -1px -1px 5px rgba(255, 255, 255, 0.5);
 }
 
 h4 {
@@ -45,7 +47,9 @@ h4 {
 }
 
 li {
-    margin: 0 0 16px 20px;
+    list-style-type: none;
+    text-align: left;
+    padding: 5px;
 }
 
 input[type=text], input[type=password], input[type=email] {
@@ -86,7 +90,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 .screen {
     display: none;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: space-around;
     width: 75%;
     height: 600px;
@@ -94,9 +98,16 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     border: 3px solid white;
     border-radius: 10px;
     box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.5) inset, -4px -4px 10px 2px rgba(0, 0, 0, 0.5) inset;
+
+    max-height: 600px;
+    overflow: auto;
 }
 
 .screen-main {
+
+}
+
+.screen-game-creation {
 
 }
 
@@ -162,7 +173,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 }
 
 .btn {
-    margin: 10px 15px 0 0;
+    /*margin: 10px 15px 0 0;*/
     color: white;
     background-color: var(--blue);
     align-self: center;
@@ -183,8 +194,17 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 }
 
 .btn-large {
-    width: 25%;
+    width: 200px;
     height: 50px;
+}
+
+.btn-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.btn-home {
+    background-color: var(--green);
 }
 
 .btn-create-game {
@@ -199,9 +219,17 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 
 }
 
-.btn-group {
+.section {
     display: flex;
     justify-content: space-around;
+    text-align: center;
+    margin: 15px;
+}
+
+.section-vert {
+    justify-content: flex-start;
+    flex-direction: column;
+    min-width: 200px;
 }
 
 .btn-join {
@@ -228,6 +256,55 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     background-color: #b22222;
     pointer-events: none;
 }
+
+.mode-block {
+    height: 50px;
+    width: 100%;
+    border: 1px solid var(--dark);
+    border-radius: 10px;
+    color: var(--dark);
+    background-color: rgba(255, 255, 255, 0.3);
+    margin: 5px;
+    display: flex;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+.mode-set {
+    background-color: rgba(0, 204, 0, 0.3);
+}
+.mode-inactive {
+    background-color: rgba(204, 0, 0, 0.3);
+    pointer-events: none;
+}
+.mode-block .mode-name {
+    flex-basis: 75%;
+    text-align: center;
+    line-height: 50px;
+    overflow: hidden;
+}
+.mode-block .mode-checkbox {
+    border-left: 1px solid var(--dark);
+    flex-basis: 25%;
+    text-align: center;
+    line-height: 50px;
+}
+.mode-block .tooltip {
+    position: absolute;
+    z-index: 1;
+    display: none;
+    color: white;
+    background-color: var(--dark);
+    border-radius: 10px;
+    width: 100%;
+    bottom: 115%;
+    pointer-events: none;
+}
+.mode-block:hover .tooltip {
+    display: block;
+}
+
+/* ----------------------------------------------------------------------------------- */
 
 .users-online {
     padding: 10px 10px;
@@ -288,7 +365,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     cursor: pointer;
 }
 
-.form-signup, .form-login, .form-verify, .form-request-verify, .form-forgot-password, .form-reset-password {
+.form-signup, .form-login, .form-verify, .form-request-verify, .form-forgot-password, .form-reset-password, form-game-creation {
     display: grid;
     grid-template-columns: 280px;
     grid-template-rows: 40px 40px 40px 40px 40px;
