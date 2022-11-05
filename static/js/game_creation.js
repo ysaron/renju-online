@@ -1,10 +1,10 @@
 const modeList = document.getElementById("mode-list")
 const ruleList = document.getElementById("rule-list")
 
-const modesLoader = document.getElementById("modes-loader")
-const rulesLoader = document.getElementById("rules-loader")
+const modesLoader = makeLoaderGrid("modes-loader")
+const rulesLoader = makeLoaderGrid("rules-loader")
 
-btnCreateGame.addEventListener("click", startGameCreation)
+for (let btn of btnsCreateGame) {btn.addEventListener("click", startGameCreation)}
 
 formCreateGame.addEventListener("submit", sendFormCreateGame)
 
@@ -15,7 +15,9 @@ function showScreenGameCreation() {
 
 function startGameCreation() {
     showScreenGameCreation();
+    modeList.appendChild(modesLoader);
     modesLoader.style.display = "inline-block";
+    ruleList.appendChild(rulesLoader);
     rulesLoader.style.display = "inline-block";
     let token = getToken();
     fetch(`${origin}/modes`, {
@@ -72,39 +74,10 @@ function addGameModeList(modes) {
             modeCheckbox.innerHTML = "&#10008;";
         }
 
-        const modeTooltip = document.createElement("div");
+        let modeTooltip = createRulesTooltip(
+            mode.time_limit, mode.board_size, mode.classic_mode, mode.with_myself, mode.three_players
+        );
         modeTooltip.classList.add("tooltip");
-
-        if (mode.time_limit != null) {
-            let p = document.createElement("div");
-            if (mode.time_limit == 0) {
-                var limit = "No";
-            } else {
-                var limit = `${mode.time_limit}s`;
-            }
-            p.innerHTML = `Time limit: ${limit}`;
-            modeTooltip.appendChild(p);
-        }
-        if (mode.board_size) {
-            let p = document.createElement("div");
-            p.innerHTML = `Board: ${mode.board_size}x${mode.board_size}`;
-            modeTooltip.appendChild(p);
-        }
-        if (mode.classic_mode) {
-            let p = document.createElement("div");
-            p.innerHTML = "Classic mode";
-            modeTooltip.appendChild(p);
-        }
-        if (mode.with_myself) {
-            let p = document.createElement("div");
-            p.innerHTML = "With myself";
-            modeTooltip.appendChild(p);
-        }
-        if (mode.three_players) {
-            let p = document.createElement("div");
-            p.innerHTML = "3 players";
-            modeTooltip.appendChild(p);
-        }
 
         modeBlock.appendChild(modeName);
         modeBlock.appendChild(modeCheckbox);

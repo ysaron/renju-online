@@ -33,7 +33,8 @@ async def create_game(db: AsyncSession, user: User, game_data: GameCreateSchema)
     game.board_size = rules.board_size
     game.classic_mode = rules.classic_mode
     game.with_myself = rules.with_myself
-    game.three_players = rules.three_players
+    if rules.three_players:
+        game.num_players = 3
 
     pr = PlayerRole(role=PlayerRoleEnum.first)
     pr.player = user
@@ -75,13 +76,13 @@ def _define_game_rules(modes: list[GameMode]) -> GameRules:
     return rules
 
 
-async def get_public_games(db: AsyncSession) -> list[Game]:
+async def get_available_games(db: AsyncSession) -> list[Game]:
     stmt = select(Game).where(and_(
-        Game.state == GameStateEnum.created,
+        Game.state.in_([GameStateEnum.created, GameStateEnum.pending]),
         ~Game.with_myself,
         ~Game.is_private,
     ))
-    public_games = await db.scalars(stmt)
-    return public_games.all()
+    available_games = await db.scalars(stmt)
+    return available_games.all()
 
 

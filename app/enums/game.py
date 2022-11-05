@@ -9,9 +9,9 @@ class PlayerRoleEnum(enum.Enum):
 
 
 class GameStateEnum(enum.Enum):
-    created = 1
-    pending = 2
-    finished = 3
+    created = 'created'
+    pending = 'pending'
+    finished = 'finished'
 
 
 class GameResultEnum(enum.Enum):

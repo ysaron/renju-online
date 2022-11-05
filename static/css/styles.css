@@ -18,6 +18,7 @@ body {
     color: var(--dark);
     font-size: 19px;
     line-height: 24px;
+    /*position: fixed;*/
 }
 
 button {
@@ -36,7 +37,7 @@ h1 {
 
 h2 {
     text-align: center;
-    text-shadow: -1px -1px 5px rgba(255, 255, 255, 0.5);
+    text-shadow: -2px -2px 5px rgba(255, 255, 255, 0.5);
 }
 
 h4 {
@@ -52,9 +53,16 @@ li {
     padding: 5px;
 }
 
+ul.hor-list li {
+    display: inline-block;
+    border-right: 1px solid var(--dark);
+    padding: 0 3px;
+    text-align: center;
+}
+
 input[type=text], input[type=password], input[type=email] {
     border: 1px solid white;
-    border-radius: 5px;
+    border-radius: 10px;
     padding-left: 5px;
     justify-content: end;
     height: 20px;
@@ -109,6 +117,10 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 
 .screen-game-creation {
 
+}
+
+.screen-game-list {
+    justify-content: flex-start;
 }
 
 .container-game {
@@ -180,6 +192,9 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     border: 2px solid white;
     border-radius: 10px;
 }
+.btn svg {
+    margin-top: 4px;
+}
 
 .btn:hover {
     background-color: white;
@@ -219,6 +234,10 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 
 }
 
+div.icon-wrapper {
+    min-width: 20px;
+}
+
 .section {
     display: flex;
     justify-content: space-around;
@@ -230,6 +249,59 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     justify-content: flex-start;
     flex-direction: column;
     min-width: 200px;
+}
+
+.section-top {
+    justify-content: space-between;
+}
+
+.game-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    border: 1px solid var(--dark);
+    border-radius: 10px;
+    background-color: #e6e6e6;
+    padding: 5px;
+    margin: 10px 0;
+}
+.game-item:hover {
+    background-color: white;
+}
+
+.highlight {
+    font-weight: bolder;
+}
+.green {color: var(--green);}
+.red {color: var(--red);}
+.blue {color: var(--blue);}
+.datetime {font-style: italic;}
+
+
+.player-indicators {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-around;
+    width: 70px;
+}
+.indicator {
+    border-radius: 50%;
+    width: 5px;
+    height: 5px;
+}
+.indicator-green {
+    background-color: #4dff4d;
+    box-shadow: 0 0 5px 2px #4dff4d;
+}
+.indicator-red {
+    background-color: #ff3333;
+    box-shadow: 0 0 5px 2px #ff3333;
+}
+.indicator-empty {
+    background-color: white;
+    box-shadow: 0 0 5px 2px rgba(34, 60, 80, 0.4);
 }
 
 .btn-join {
@@ -289,7 +361,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     text-align: center;
     line-height: 50px;
 }
-.mode-block .tooltip {
+.tooltip {
     position: absolute;
     z-index: 1;
     display: none;
@@ -300,9 +372,18 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     bottom: 115%;
     pointer-events: none;
 }
-.mode-block:hover .tooltip {
+.tooltip-common {
+    width: 200px;
+}
+.question {
+    position: relative;
+    text-decoration-line: underline;
+    cursor: help;
+}
+.mode-block:hover .tooltip, .question:hover .tooltip {
     display: block;
 }
+
 
 /* ----------------------------------------------------------------------------------- */
 
@@ -374,6 +455,10 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     margin: 40px auto;
 }
 
+.form-game-join input[type=text] {
+    height: 50px;
+}
+
 .btn-signup, .btn-login, .btn-verify, .btn-forgot-password, .btn-reset-password {
     width: 100%;
 }
@@ -438,7 +523,8 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 .lds-grid {
   display: none;
   position: relative;
-  width: 100%;
+  align-self: center;
+  width: 200px;
   aspect-ratio: 1 / 1;
 }
 .lds-grid div {

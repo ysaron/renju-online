@@ -58,7 +58,7 @@ class Game(UuidIdMixin, Base):
     board_size = Column(Integer, default=19)
     classic_mode = Column(Boolean, default=False)
     with_myself = Column(Boolean, default=False)
-    three_players = Column(Boolean, default=False)
+    num_players = Column(Integer, default=2)
 
 
 class GameResult(Base):

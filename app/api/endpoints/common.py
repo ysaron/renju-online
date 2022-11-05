@@ -59,14 +59,14 @@ async def create_new_game(
 @router.get(
     '/games',
     response_model=list[GameAvailableListSchema],
-    description='Получить список игр, к которым можно присоединиться',
+    description='Получить список игр, к которым можно присоединиться (как игрок или зритель)',
 )
-async def read_public_games(
+async def read_available_games(
         user: User = Depends(current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    public_games = await game_services.get_public_games(db)
-    return public_games
+    available_games = await game_services.get_available_games(db)
+    return available_games
 
 
 @router.get('/games/mine')

@@ -84,6 +84,7 @@ class GameSchema(GameCreateSchema):
     id: uuid.UUID
     state: GameStateEnum
     players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
+    num_players: int = Field(2, ge=2, le=3, description='Кол-во игроков')
     created_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
@@ -92,13 +93,14 @@ class GameSchema(GameCreateSchema):
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
-    three_players: bool = Field(..., description='Три игрока (каждый против каждого)')
     with_myself: bool = Field(..., description='Игра с самим собой')
 
 
 class GameAvailableListSchema(GameBaseSchema):
     id: uuid.UUID
+    state: GameStateEnum
     players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
+    num_players: int = Field(2, ge=2, le=3, description='Кол-во игроков')
     created_at: datetime
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
