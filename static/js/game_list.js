@@ -13,6 +13,8 @@ function showScreenGameList() {
 function openGameList() {
     showScreenGameList();
     updateGameList();
+
+    send({action: 'example', data: 'eome data !!1'});
 }
 
 function clearGameList() {

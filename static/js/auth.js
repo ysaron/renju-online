@@ -309,10 +309,8 @@ function sendFormLogin(event) {
 
             screenMainNotLoggedHide();
             screenMainLoggedShow();
-//            showLogout()
-//            showBtnMyStat()
-//            hideLoginSignup()
-            modalLoginClose()
+            modalLoginClose();
+            openWS();
         })
         .catch(response => response.json().then(response => {
             let info = getErrorInfo(response);
@@ -389,11 +387,10 @@ function sendFormResetPassword(event) {
 }
 
 function logout() {
-    sessionStorage.removeItem("token")
-    sessionStorage.removeItem("username")
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("username");
 
-    screenMainLoggedHide();
+    hideAllScreens();
     screenMainNotLoggedShow();
-//    closeWS()
-//    start()
+    closeWS();
 }

@@ -36,12 +36,15 @@ const formCreateGame = document.querySelector(".form-game-creation")
 
 const commonData = document.getElementById("common-data")
 const origin = `http://${commonData.dataset.remotehost}:${commonData.dataset.port}`
+const wsURL = `ws://${commonData.dataset.remotehost}:${commonData.dataset.port}/renju/ws`
 
 const joinSpectateBtnsTemp = document.getElementById("join-spectate-btns");
 const svgEyeTemp = document.getElementById("svg-eye");
 
 const playerRoles = ["1", "2", "3"];
 const spectatorRoles = ["4"];
+
+let ws;
 
 function showMainScreen() {
     if (sessionStorage.getItem('token') && sessionStorage.getItem('username')) {
@@ -59,12 +62,16 @@ function getToken() {
     token = sessionStorage.getItem('token');
     if (!token) {
         alert("Unauthorized. Please, log in");
+        closeWS();
         showMainScreen();
     }
     return token
 }
 
-document.addEventListener("DOMContentLoaded", showMainScreen);
+document.addEventListener("DOMContentLoaded", function() {
+    showMainScreen();
+    if (sessionStorage.getItem('token') && sessionStorage.getItem('username')) openWS();
+});
 
 function humanizeError(code) {
     switch (code) {
@@ -176,4 +183,44 @@ function makeLoaderGrid(id) {
     }
     grid.id = id;
     return grid
+}
+
+function openWS() {
+    let token = getToken();
+    ws = new WebSocket(`${wsURL}?token=${token}`);
+    console.log('example', `${wsURL}?token=${token}`)
+    wsDispatcher();
+}
+
+function wsDispatcher() {
+    ws.onopen = function (event) {
+        console.log('open', event);
+    }
+
+    ws.onmessage = function (event) {
+        let data = JSON.parse(event.data);
+        console.log('data.action', data.action);
+        switch (data.action) {
+            case 'example':
+                console.log('data', data)
+                break
+            default:
+                break
+        }
+    }
+
+    ws.onclose = function (event) {
+        console.log('Disconnected;', event);
+    }
+    ws.onerror = function (event) {
+        console.log('ERROR:', event);
+    }
+}
+
+function send(data) {
+    ws.send(JSON.stringify(data));
+}
+
+function closeWS() {
+    ws.close();
 }

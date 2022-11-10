@@ -8,6 +8,10 @@ from app.schemas.game import GameModeInGameSchema, GameCreateSchema, GameRules, 
 from app.enums.game import PlayerRoleEnum, GameStateEnum
 
 
+class GameService:
+    pass
+
+
 async def get_game_modes(db: AsyncSession, pk_list: list | None = None) -> list[GameMode]:
     stmt = select(GameMode)
     if pk_list is not None:
