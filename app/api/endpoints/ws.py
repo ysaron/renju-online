@@ -6,8 +6,11 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
 from app.core.ws.base import WebSocketActions
 from app.core.ws.manager import WSConnection
 from app.api.services.games import GameService
+from app.auth.deps import get_current_user_dependency
+from app.models.user import User
 
 router = APIRouter()
+get_current_user = get_current_user_dependency(is_verified=True, websocket_mode=True)
 
 
 class RenjuWSEndpoint(WebSocketActions):
@@ -27,7 +30,5 @@ class RenjuWSEndpoint(WebSocketActions):
 
 
 @router.websocket('/renju/ws')
-async def renju(websocket: WebSocket, token: str = Query(None, description='That Bearer token')):
-    print(f'{token = }')
-    user_id = uuid.uuid4()
-    await RenjuWSEndpoint().dispatch(WSConnection(websocket, user_id))
+async def renju(websocket: WebSocket, user: User = Depends(get_current_user)):
+    await RenjuWSEndpoint().dispatch(websocket, user)

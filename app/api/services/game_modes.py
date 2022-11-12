@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from sqlalchemy.dialects import postgresql as psql
 
-from app.core.db.utils import get_async_session
+from app.core.db.deps import get_async_session
 from app.schemas.game import GameModeSchema
 from app.models.game import GameMode
 from app.config import config

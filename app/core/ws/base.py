@@ -7,6 +7,7 @@ from starlette import status
 from starlette.types import Message
 
 from .manager import ConnectionManager, WSConnection
+from app.models.user import User
 
 
 class ConnDataAwaitable(Protocol):
@@ -19,7 +20,7 @@ class WebSocketEndpoint:
     encoding: str | None = None     # "text", "bytes", or "json".
 
     @abstractmethod
-    async def dispatch(self, connection: WSConnection) -> None:
+    async def dispatch(self, websocket: WebSocket, user: User | None = None) -> None:
         """ Override to handle websocket interactions """
 
     @abstractmethod
@@ -74,11 +75,17 @@ class WebSocketActions(WebSocketEndpoint):
     async def action_not_allowed(self, connection: WSConnection, data: Any) -> None:
         await self.manager.send_message(connection.websocket, {'action': 'Not allowed'})
 
-    async def dispatch(self, connection: WSConnection) -> None:
+    async def dispatch(self, websocket: WebSocket, user: User | None = None) -> None:
+        connection = WSConnection(websocket, user_id=user.id if user else None)
+        await connection.websocket.accept()
         await self.on_connect(connection)
         close_code = status.WS_1000_NORMAL_CLOSURE
         try:
             while True:
+                if user is None:    # If unauthorized
+                    close_code = status.WS_1008_POLICY_VIOLATION
+                    await connection.websocket.close(close_code, reason='UNAUTHORIZED')
+                    break
                 message = await connection.websocket.receive()
                 if message['type'] == 'websocket.receive':
                     data = await self.decode(connection.websocket, message)
@@ -98,7 +105,6 @@ class WebSocketActions(WebSocketEndpoint):
             await self.on_disconnect(connection, close_code)
 
     async def on_connect(self, connection: WSConnection) -> None:
-        # await connection.websocket.accept()
         await self.manager.connect(connection)
 
     async def on_receive(self, connection: WSConnection, data: Any) -> None:

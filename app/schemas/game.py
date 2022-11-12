@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from .user import UserSchema
+from .user import UserRead
 from app.enums.game import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
 
 
@@ -44,7 +44,7 @@ class GameModeInGameSchema(GameModeBaseSchema):
 
 
 class PlayerRoleSchema(BaseModel):
-    player: UserSchema
+    player: UserRead
     role: PlayerRoleEnum
     ready: bool = False
 
@@ -55,7 +55,7 @@ class PlayerRoleSchema(BaseModel):
 class ResultSchema(BaseModel):
     result: GameResultEnum
     cause: GameResultCauseEnum
-    winner: UserSchema
+    winner: UserRead
 
     class Config:
         orm_mode = True
@@ -63,7 +63,7 @@ class ResultSchema(BaseModel):
 
 class MoveSchema(BaseModel):
     id: int
-    player: UserSchema
+    player: UserRead
     x_coord: int = Field(..., ge=0)
     y_coord: int = Field(..., ge=0)
 

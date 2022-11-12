@@ -265,7 +265,7 @@ function sendFormVerify(event) {
             if (response.ok) {
                 alert("Account verified")
                 modalVerifyClose()
-                return response.json()
+                return
             }
             return Promise.reject(response);
         })
@@ -376,7 +376,7 @@ function sendFormResetPassword(event) {
                 alert("Password changed")
                 modalResetPasswordClose()
                 hideRequestVerification()
-                return response.json()
+                return
             }
             return Promise.reject(response);
         })

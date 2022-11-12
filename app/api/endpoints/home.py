@@ -3,10 +3,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from app.config import config
-from app.core.users.manager import fa_users
 
 router = APIRouter()
-current_user = fa_users.current_user(active=True, verified=True)
 
 
 @router.get('/', response_class=HTMLResponse)

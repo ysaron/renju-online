@@ -83,10 +83,22 @@ function humanizeError(code) {
             return "Bad token, non-existing user or not the e-mail currently set for the user."
         case "RESET_PASSWORD_BAD_TOKEN":
             return "Bad or expired token."
+        case "BAD_TOKEN":
+            return "Bad access token"
+        case "EXPIRED_TOKEN":
+            return "Expired access token"
+        case "USER_NOT_FOUND":
+            return "User not found"
+        case "USER_NOT_VERIFIED":
+            return "User not verified. Try log in again"
         case "LOGIN_BAD_CREDENTIALS":
             return "Bad credentials or user is inactive."
         case "LOGIN_USER_NOT_VERIFIED":
             return "The user is not verified"
+        case "PASSWORD_TOO_SHORT":
+            return "Password should be at least 8 characters"
+        case "PASSWORD_INSECURE":
+            return "Password is too similar to email or username"
         default:
             return code
     }
@@ -187,8 +199,8 @@ function makeLoaderGrid(id) {
 
 function openWS() {
     let token = getToken();
-    ws = new WebSocket(`${wsURL}?token=${token}`);
-    console.log('example', `${wsURL}?token=${token}`)
+    ws = new WebSocket(`${wsURL}?querytoken=${token}`);
+    console.log('example', `${wsURL}?querytoken=${token}`)
     wsDispatcher();
 }
 

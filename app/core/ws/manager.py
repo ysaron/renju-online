@@ -7,7 +7,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 @dataclass(frozen=True)
 class WSConnection:
     websocket: WebSocket
-    user_id: UUID
+    user_id: UUID | None
 
 
 @dataclass
@@ -25,7 +25,6 @@ class ConnectionManager:
         self.active_connections: WSConnectionList = WSConnectionList()
 
     async def connect(self, connection: WSConnection) -> None:
-        await connection.websocket.accept()
         self.active_connections.all.append(connection)
 
     def disconnect(self, connection: WSConnection) -> None:

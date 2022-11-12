@@ -16,6 +16,8 @@ class Config(BaseSettings):
     POSTGRES_PASSWORD: str = 'password'
     POSTGRES_PORT: str = 5432
     POSTGRES_DB: str = 'db'
+    JWT_SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_SECONDS: int = 30 * 60
     RESET_PASSWORD_TOKEN_SECRET: str
     VERIFICATION_TOKEN_SECRET: str
     EMAIL_HOST: str

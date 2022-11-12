@@ -1,9 +1,6 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, Query, Body
 
-from app.core.users.manager import fa_users
-from app.core.db.utils import AsyncSession, get_async_session
+from app.core.db.deps import AsyncSession, get_async_session
 from app.models.user import User
 from app.schemas.game import (
     GameModeSchema,
@@ -16,9 +13,10 @@ from app.schemas.game import (
     ModesAndRules,
 )
 from app.api.services import games as game_services
+from app.auth.deps import get_current_user_dependency
 
 router = APIRouter()
-current_user = fa_users.current_user(active=True, verified=True)
+get_current_user = get_current_user_dependency(is_verified=True)
 
 
 @router.get(
@@ -27,7 +25,7 @@ current_user = fa_users.current_user(active=True, verified=True)
     description='Получить список доступных режимов игры, чтобы создать игру',
 )
 async def read_game_modes(
-        user: User = Depends(current_user),
+        user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
     all_modes = await game_services.get_game_modes(db)
@@ -38,7 +36,7 @@ async def read_game_modes(
 @router.put('/modes', response_model=GameRules)
 async def update_rules(
         *,
-        user: User = Depends(current_user),
+        user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
         modes: list[GameModeInGameSchema],
 ):
@@ -48,7 +46,7 @@ async def update_rules(
 @router.post('/games/create', response_model=GameSchema, description='Создание новой игры')
 async def create_new_game(
         *,
-        user: User = Depends(current_user),
+        user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
         game: GameCreateSchema,
 ):
@@ -62,7 +60,7 @@ async def create_new_game(
     description='Получить список игр, к которым можно присоединиться (как игрок или зритель)',
 )
 async def read_available_games(
-        user: User = Depends(current_user),
+        user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
     available_games = await game_services.get_available_games(db)
@@ -71,7 +69,7 @@ async def read_available_games(
 
 @router.get('/games/mine')
 async def read_my_finished_games(
-        user: User = Depends(current_user),
+        user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
     # --- Возвращаем все Game с state=finished, user in get_players(game)
