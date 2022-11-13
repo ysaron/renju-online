@@ -17,7 +17,9 @@ services:
       - db
       - redis
   db:
-    image: postgres:14
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
     container_name: db
     volumes:
       - pgdata_dev:/var/lib/postgresql/data/

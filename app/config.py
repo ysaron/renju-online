@@ -8,6 +8,7 @@ class Config(BaseSettings):
     ENV: str = 'dev'
     DEBUG: bool = True
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
+    APP_SCHEMA: str = 'http'
     APP_HOST: str = 'localhost'     # хост в Docker
     REMOTE_HOST: str = 'localhost'  # хост для доступа извне
     APP_PORT: int = 8000
