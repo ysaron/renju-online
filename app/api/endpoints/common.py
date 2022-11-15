@@ -1,18 +1,16 @@
-from fastapi import APIRouter, Depends, Query, Body
+from fastapi import APIRouter, Depends
 
 from app.core.db.deps import AsyncSession, get_async_session
 from app.models.user import User
 from app.schemas.game import (
-    GameModeSchema,
     GameModeInGameSchema,
-    GameJoinSchema,
     GameCreateSchema,
     GameSchema,
     GameAvailableListSchema,
     GameRules,
     ModesAndRules,
 )
-from app.api.services import games as game_services
+from app.api.services.games import GameService
 from app.auth.deps import get_current_user_dependency
 
 router = APIRouter()
@@ -28,8 +26,8 @@ async def read_game_modes(
         user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    all_modes = await game_services.get_game_modes(db)
-    rules = await game_services.get_current_rules(db)
+    all_modes = await GameService(db).get_modes()
+    rules = await GameService(db).get_current_rules()
     return ModesAndRules(modes=all_modes, rules=rules)
 
 
@@ -40,7 +38,7 @@ async def update_rules(
         db: AsyncSession = Depends(get_async_session),
         modes: list[GameModeInGameSchema],
 ):
-    return await game_services.get_current_rules(db, modes)
+    return await GameService(db).get_current_rules(modes)
 
 
 @router.post('/games/create', response_model=GameSchema, description='Создание новой игры')
@@ -50,7 +48,7 @@ async def create_new_game(
         db: AsyncSession = Depends(get_async_session),
         game: GameCreateSchema,
 ):
-    game = await game_services.create_game(db, user=user, game_data=game)
+    game = await GameService(db).create_game(creator=user, game_data=game)
     return game
 
 
@@ -63,7 +61,7 @@ async def read_available_games(
         user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    available_games = await game_services.get_available_games(db)
+    available_games = await GameService(db).get_available_games()
     return available_games
 
 

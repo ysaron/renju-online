@@ -16,7 +16,6 @@ get_current_user = get_current_user_dependency(is_verified=True, websocket_mode=
 class RenjuWSEndpoint(WebSocketActions):
     encoding = 'json'
     actions = ['create_game', 'start_game', 'join_game', 'ready', 'move', 'example']
-    service = GameService()
 
     async def example(self, connection: WSConnection, data: Any) -> None:
         """  """
