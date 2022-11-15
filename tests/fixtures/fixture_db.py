@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
@@ -36,3 +38,12 @@ async def async_session():
         await conn.run_sync(Base.metadata.drop_all)
 
     await engine.dispose()
+
+
+@pytest.fixture(scope='function')
+def user_data() -> dict:
+    data_file = config.BASE_DIR / 'tests' / 'fixtures' / 'data' / 'user_data.json'
+    with open(data_file, 'r') as file:
+        data = json.load(file)
+
+    return data

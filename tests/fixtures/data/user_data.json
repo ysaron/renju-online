@@ -1,0 +1,35 @@
+{
+  "register": {
+    "bad": {
+      "short_password": {
+        "name": "Zxcvbnm",
+        "email": "example@example.com",
+        "password": "qwerty"
+      },
+      "simple_password": {
+        "name": "Example",
+        "email": "example@example.com",
+        "password": "exampleexample"
+      }
+    },
+    "good": {
+      "name": "User01",
+      "email": "example@example.com",
+      "password": "aBrAcAdAbRa"
+    }
+  },
+  "login": {
+    "bad_credentials": {
+      "email": "example@example.com",
+      "password": "some_wrong_password"
+    },
+    "wrong_email": {
+      "email": "example01@example.com",
+      "password": "aBrAcAdAbRa"
+    },
+    "good": {
+      "email": "example@example.com",
+      "password": "aBrAcAdAbRa"
+    }
+  }
+}
