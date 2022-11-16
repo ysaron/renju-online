@@ -38,6 +38,7 @@ function updateGameList() {
             if (response.ok) {
                 return response.json()
             }
+            onFetchError(response.status);
             return Promise.reject(response);
         })
         .then(response => {

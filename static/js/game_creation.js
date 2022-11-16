@@ -32,6 +32,7 @@ function startGameCreation() {
             if (response.ok) {
                 return response.json()
             }
+            onFetchError(response.status);
             return Promise.reject(response);
         })
         .then(response => {
@@ -145,6 +146,7 @@ function addMode(event) {
             if (response.ok) {
                 return response.json()
             }
+            onFetchError(response.status);
             return Promise.reject(response);
         })
         .then(response => {
@@ -193,6 +195,7 @@ function sendFormCreateGame(event) {
                 showMainScreen();       // TODO: redirect to game
                 return response.json()
             }
+            onFetchError(response.status);
             return Promise.reject(response);
         })
         .catch(response => response.json().then(response => {

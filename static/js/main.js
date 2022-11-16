@@ -73,6 +73,16 @@ document.addEventListener("DOMContentLoaded", function() {
     if (sessionStorage.getItem('token') && sessionStorage.getItem('username')) openWS();
 });
 
+function onFetchError(statusCode) {
+    switch (statusCode) {
+        case 401:
+            logout();
+            break;
+        default:
+            break;
+    }
+}
+
 function humanizeError(code) {
     switch (code) {
         case "REGISTER_USER_ALREADY_EXISTS":
@@ -84,7 +94,7 @@ function humanizeError(code) {
         case "RESET_PASSWORD_BAD_TOKEN":
             return "Bad or expired token."
         case "BAD_TOKEN":
-            return "Bad access token"
+            return "Please, log in again."
         case "EXPIRED_TOKEN":
             return "Expired access token"
         case "USER_NOT_FOUND":
@@ -223,6 +233,10 @@ function wsDispatcher() {
 
     ws.onclose = function (event) {
         console.log('Disconnected;', event);
+        if (event.code == 1008) {
+            console.log(event.code);
+            logout();
+        }
     }
     ws.onerror = function (event) {
         console.log('ERROR:', event);

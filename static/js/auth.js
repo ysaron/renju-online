@@ -294,9 +294,7 @@ function sendFormLogin(event) {
             return Promise.reject(response);
         })
         .then(response => {
-//            console.log(`Token = ${response.access_token}`);
             getMe(response.access_token).then(myData => {
-//                console.log(`myData: ${JSON.stringify(myData)}`);
                 sessionStorage.setItem('username', myData.name);
             })
                 .then(myData => {
