@@ -15,86 +15,95 @@
      style="display: none;"></div>
 
 <div id="main" class="container">
-  <div id="mainscreen-not-logged" class="screen screen-main">
-    <div class=""><h1>Renju v1.0</h1></div>
-    <div class="section">
-      <button type="button" class="btn btn-large login">Login</button>
-      <button type="button" class="btn btn-large signup">Signup</button>
+  <div id="screens" class="screens-container">
+    <div id="online-block" class="online-block">
+      <div class="indicator indicator-red"></div>
+      <div class="online-text">Offline</div>
     </div>
-  </div>
-  <div id="mainscreen-logged" class="screen screen-main">
-    <div class=""><h1>Renju v1.0</h1></div>
-    <div class="section">
-      <button type="button" class="btn btn-large">Hi, <span class="span-username"></span>!</button>
-      <button type="button" class="btn btn-large logout">Logout</button>
+    <div id="online-counter-block" class="online-counter-block">
+      <div>Total online:</div>
+      <div class="online-counter">unknown</div>
     </div>
-    <div class="section">
-      <button type="button" class="btn btn-large btn-create-game">Create</button>
-      <button type="button" class="btn btn-large btn-join-game">Join</button>
-      <button type="button" class="btn btn-large btn-my-stats">Statistics</button>
-    </div>
-  </div>
-  <div id="game-creation" class="screen screen-game-creation">
-    <div class="section section-top">
-      <button type="button" class="btn btn-icon btn-home">X</button>
-      <button type="button" class="btn btn-large btn-join-game">Join</button>
-    </div>
-    <div class="section">
-      <div class="section section-vert" id="mode-list">
-        <h2>Modes</h2>
-      </div>
-      <div class="section section-vert">
-        <h2>Current rules</h2>
-        <ul id="rule-list">
-        </ul>
+    <div id="mainscreen-not-logged" class="screen screen-main">
+      <div class=""><h1>Renju v1.0</h1></div>
+      <div class="section">
+        <button type="button" class="btn btn-large login">Login</button>
+        <button type="button" class="btn btn-large signup">Signup</button>
       </div>
     </div>
-    <div class="section">
-      <form class="form-game-creation">
-        <div class="">
-          <input type="checkbox" name="is_private" id="game-is-private">
-          <label for="game-is-private"> Is Private</label>
-        </div>
-        <div class="">
-          <button type="submit" class="btn btn-large btn-create-game">Create</button>
-        </div>
-      </form>
+    <div id="mainscreen-logged" class="screen screen-main">
+      <div class=""><h1>Renju v1.0</h1></div>
+      <div class="section">
+        <button type="button" class="btn btn-large">Hi, <span class="span-username"></span>!</button>
+        <button type="button" class="btn btn-large logout">Logout</button>
+      </div>
+      <div class="section">
+        <button type="button" class="btn btn-large btn-create-game">Create</button>
+        <button type="button" class="btn btn-large btn-join-game">Join</button>
+        <button type="button" class="btn btn-large btn-my-stats">Statistics</button>
+      </div>
     </div>
-  </div>
-
-  <div id="game-list-screen" class="screen screen-game-list">
-    <div class="section section-top">
-      <button type="button" class="btn btn-icon btn-home">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-        </svg>
-      </button>
-      <button type="button" class="btn btn-large btn-create-game">Create</button>
-      <button type="button" class="btn btn-icon btn-refresh" title="Refresh">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-        </svg>
-      </button>
-      <form class="form-game-join">
-        <label for="private-game-id">Join private game</label>
-        <input type="text" name="game_id" id="private-game-id" placeholder="Game ID">
-      </form>
-      <div>
-        <button type="button" id="spectate-private-game" class="btn btn-icon" title="Spectate">
+    <div id="game-creation" class="screen screen-game-creation">
+      <div class="section section-top">
+        <button type="button" class="btn btn-icon btn-home">X</button>
+        <button type="button" class="btn btn-large btn-join-game">Join</button>
+      </div>
+      <div class="section">
+        <div class="section section-vert" id="mode-list">
+          <h2>Modes</h2>
+        </div>
+        <div class="section section-vert">
+          <h2>Current rules</h2>
+          <ul id="rule-list">
+          </ul>
+        </div>
+      </div>
+      <div class="section">
+        <form class="form-game-creation">
+          <div class="">
+            <input type="checkbox" name="is_private" id="game-is-private">
+            <label for="game-is-private"> Is Private</label>
+          </div>
+          <div class="">
+            <button type="submit" class="btn btn-large btn-create-game">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="game-list-screen" class="screen screen-game-list">
+      <div class="section section-top">
+        <button type="button" class="btn btn-icon btn-home">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
         </button>
-        <button type="button" id="join-private-game" class="btn btn-icon" title="Join">
+        <button type="button" class="btn btn-large btn-create-game">Create</button>
+        <button type="button" class="btn btn-icon btn-refresh" title="Refresh">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
         </button>
+        <form class="form-game-join">
+          <label for="private-game-id">Join private game</label>
+          <input type="text" name="game_id" id="private-game-id" placeholder="Game ID">
+        </form>
+        <div>
+          <button type="button" id="spectate-private-game" class="btn btn-icon" title="Spectate">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+          <button type="button" id="join-private-game" class="btn btn-icon" title="Join">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        </div>
       </div>
+      <h2>Available public games</h2>
+      <div id="game-list" class="section section-vert"></div>
     </div>
-    <h2>Available public games</h2>
-    <div id="game-list" class="section section-vert"></div>
   </div>
 </div>
 

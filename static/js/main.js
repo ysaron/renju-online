@@ -1,4 +1,7 @@
 const mainContainer = document.getElementById("main")
+const screens = document.getElementById("screens")
+const onlineBlock = document.getElementById("online-block")
+const onlineCounterBlock = document.getElementById("online-counter-block")
 const screenMainNotLogged = document.getElementById("mainscreen-not-logged")
 const screenMainLogged = document.getElementById("mainscreen-logged")
 const screenGameCreation = document.getElementById("game-creation")
@@ -126,8 +129,10 @@ function getErrorInfo(response) {
 }
 
 function hideAllScreens() {
-    for (const child of mainContainer.children) {
-        child.style.display = 'none';
+    for (const child of screens.children) {
+        if (child.classList.contains('screen')) {
+            child.style.display = 'none';
+        }
     }
 }
 
@@ -211,6 +216,7 @@ function openWS() {
     let token = getToken();
     ws = new WebSocket(`${wsURL}?querytoken=${token}`);
     console.log('example', `${wsURL}?querytoken=${token}`)
+    setMeOnline();
     wsDispatcher();
 }
 
@@ -226,6 +232,9 @@ function wsDispatcher() {
             case 'example':
                 console.log('data', data)
                 break
+            case 'online_counter':
+                updateTotalOnline(data.total);
+                break;
             default:
                 break
         }
@@ -233,6 +242,8 @@ function wsDispatcher() {
 
     ws.onclose = function (event) {
         console.log('Disconnected;', event);
+        setMeOffline();
+        hideTotalOnline();
         if (event.code == 1008) {
             console.log(event.code);
             logout();
@@ -249,4 +260,30 @@ function send(data) {
 
 function closeWS() {
     ws.close();
+}
+
+function setMeOnline() {
+    let indicator = onlineBlock.querySelector(".indicator");
+    let onlineText = onlineBlock.querySelector(".online-text");
+    indicator.className = "";
+    indicator.classList.add("indicator", "indicator-green");
+    onlineText.innerHTML = "Online";
+}
+
+function setMeOffline() {
+    let indicator = onlineBlock.querySelector(".indicator");
+    let onlineText = onlineBlock.querySelector(".online-text");
+    indicator.className = "";
+    indicator.classList.add("indicator", "indicator-red");
+    onlineText.innerHTML = "Offline";
+}
+
+function updateTotalOnline(number) {
+    onlineCounterBlock.style.display = "flex";
+    let counter = onlineCounterBlock.querySelector(".online-counter");
+    counter.innerHTML = number;
+}
+
+function hideTotalOnline() {
+    onlineCounterBlock.style.display = "none";
 }

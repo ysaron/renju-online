@@ -104,8 +104,15 @@ class WebSocketActions(WebSocketEndpoint):
         finally:
             await self.on_disconnect(connection, close_code)
 
+    async def update_total_online(self) -> None:
+        await self.manager.broadcast({
+            'action': 'online_counter',
+            'total': await self.manager.get_online(),
+        })
+
     async def on_connect(self, connection: WSConnection) -> None:
         await self.manager.connect(connection)
+        await self.update_total_online()
 
     async def on_receive(self, connection: WSConnection, data: Any) -> None:
         # handler: Callable[[WSConnection, Any], Awaitable] = getattr(self, data['action'], self.action_not_allowed)
@@ -116,3 +123,4 @@ class WebSocketActions(WebSocketEndpoint):
 
     async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:
         self.manager.disconnect(connection)
+        await self.update_total_online()
