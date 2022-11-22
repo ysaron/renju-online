@@ -50,7 +50,8 @@ async def create_superuser():
 
 @app.on_event('startup')
 async def create_game_modes():
-    await bulk_create_game_modes()
+    async with get_async_session_context() as db:
+        await bulk_create_game_modes(db)
 
 
 if __name__ == '__main__':

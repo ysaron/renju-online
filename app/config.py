@@ -30,6 +30,9 @@ class Config(BaseSettings):
     ADMIN_EMAIL: EmailStr
     ADMIN_PASSWORD: str
     ADMIN_USERNAME: str
+    TEST_USER_EMAIL: EmailStr
+    TEST_USER_PASSWORD: str
+    TEST_USER_USERNAME: str
     REDIS_HOST_NAME: str = 'redis'
     REDIS_PORT: int = 6379
     REDIS_HOST_PASSWORD: str = ''

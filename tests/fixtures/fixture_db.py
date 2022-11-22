@@ -9,6 +9,11 @@ from sqlalchemy.orm import sessionmaker
 
 from app.config import config
 from app.core.db.base import Base
+from app.api.services.game_modes import bulk_create_game_modes
+from app.api.services.games import GameService
+from app.auth.services import UserService
+from app.schemas.game import GameModeInGameSchema
+from app.schemas.user import UserCreateProgrammatically
 from main import app
 
 DB_URL = f'postgresql+asyncpg://{config.POSTGRES_USER}:{config.POSTGRES_PASSWORD}@db:' \
@@ -47,3 +52,38 @@ def user_data() -> dict:
         data = json.load(file)
 
     return data
+
+
+@pytest_asyncio.fixture(scope='function')
+async def modes(async_session) -> list[GameModeInGameSchema]:
+    await bulk_create_game_modes(async_session)
+    modes_orm = await GameService(async_session).get_modes()
+    return [GameModeInGameSchema(name=mode.name, id=mode.id) for mode in modes_orm if mode.is_active]
+
+
+@pytest_asyncio.fixture(scope='function')
+async def modes_no(modes: list[GameModeInGameSchema]):
+    return []
+
+
+@pytest_asyncio.fixture(scope='function')
+async def modes_public(modes: list[GameModeInGameSchema]):
+    return [mode for mode in modes if mode.name == 'Trinity']
+
+
+@pytest_asyncio.fixture(scope='function')
+async def modes_private(modes: list[GameModeInGameSchema]):
+    return [mode for mode in modes if mode.name in ['Trinity', 'Standalone']]
+
+
+@pytest_asyncio.fixture(scope='function')
+async def test_user(async_session):
+    user_schema = UserCreateProgrammatically(
+        name=config.TEST_USER_USERNAME,
+        email=config.TEST_USER_EMAIL,
+        password=config.TEST_USER_PASSWORD,
+        is_active=True,
+        is_verified=True,
+        is_superuser=False,
+    )
+    return await UserService(async_session).create_user(user_schema)
