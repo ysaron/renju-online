@@ -69,7 +69,7 @@ function addGameInList(game) {
     let creator = document.createElement("div");
     creator.innerHTML = "by ";
     let creatorName = document.createElement("span");
-    creatorName.innerHTML = getPlayer(game, "1").player.name;
+    creatorName.innerHTML = game.player_1.player.name;
     creatorName.classList.add("highlight", "green");
     creator.appendChild(creatorName);
     gameInfo.appendChild(creator);
@@ -123,21 +123,32 @@ function addGameInList(game) {
     // Indicators
     let indicatorBlock = document.createElement("div");
     indicatorBlock.classList.add("player-indicators");
-    for(let i=0; i < game.num_players; ++i) {
+    for (let i=0; i < game.num_players; ++i) {
         let indicator = document.createElement("div");
-        let indClass = getAllPlayers(game)[i] ? "indicator-green" : "indicator-empty";
-        indicator.classList.add("indicator", indClass);
+        indicator.classList.add("indicator", "indicator-empty");
         indicatorBlock.appendChild(indicator);
     }
-    playersBlock.appendChild(indicatorBlock);
+    if (game.player_1) {
+        indicatorBlock.children[0].classList.remove("indicator-empty");
+        indicatorBlock.children[0].classList.add("indicator-green");
+    }
+    if (game.player_2) {
+        indicatorBlock.children[1].classList.remove("indicator-empty");
+        indicatorBlock.children[1].classList.add("indicator-green");
+    }
+    if (game.player_3) {
+        indicatorBlock.children[2].classList.remove("indicator-empty");
+        indicatorBlock.children[2].classList.add("indicator-green");
+    }
 
+    playersBlock.appendChild(indicatorBlock);
     gameItem.appendChild(playersBlock);
 
     // --- Spectators info -------------------------------------------------------------------
     let spectatorsBlock = document.createElement("div");
     let svgEye = svgEyeTemp.content.firstElementChild.cloneNode(true);
     spectatorsBlock.appendChild(svgEye);
-    spectatorsBlock.innerHTML += ` ${getAllSpectators(game).length}`;
+    spectatorsBlock.innerHTML += ` ${game.spectators.length}`;
 
     gameItem.appendChild(spectatorsBlock);
 
@@ -146,27 +157,4 @@ function addGameInList(game) {
 
     gameList.appendChild(gameItem);
 
-}
-
-function getPlayer(game, role) {
-    if (!playerRoles.includes(role)) throw "Unknown player role";
-    for (let player of game.players) {
-        if (player.role == role) return player;
-    }
-}
-
-function getAllPlayers(game) {
-    let allPlayers = [];
-    for (let player of game.players) {
-        if (playerRoles.includes(player.role)) allPlayers.push(player);
-    }
-    return allPlayers
-}
-
-function getAllSpectators(game) {
-    let allSpectators = [];
-    for (let player of game.players) {
-        if (spectatorRoles.includes(player.role)) allSpectators.push(player);
-    }
-    return allSpectators
 }

@@ -172,34 +172,12 @@ function getChosenModes() {
 function sendFormCreateGame(event) {
     event.preventDefault();
     modes = getChosenModes();
-    let data = {}
-    let token = getToken();
+    let data = {action: "create_game"};
     data.modes = modes;
     let formData = new FormData(this)
     formData.forEach(function (value, key) {
         data[key] = value;
     });
 
-    fetch(`${origin}/games/create`, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    })
-        .then(response => {
-            if (response.ok) {
-                alert("Game created");
-                showMainScreen();       // TODO: redirect to game
-                return response.json()
-            }
-            onFetchError(response.status);
-            return Promise.reject(response);
-        })
-        .catch(response => response.json().then(response => {
-            let info = getErrorInfo(response);
-            alert(info);
-        }))
+    send(data);
 }

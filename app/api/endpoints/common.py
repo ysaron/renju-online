@@ -5,8 +5,8 @@ from app.models.user import User
 from app.schemas.game import (
     GameModeInGameSchema,
     GameCreateSchema,
-    GameSchema,
-    GameAvailableListSchema,
+    GameFullSchema,
+    GameSchemaOut,
     GameRules,
     ModesAndRules,
 )
@@ -41,20 +41,9 @@ async def update_rules(
     return await GameService(db).get_current_rules(modes)
 
 
-@router.post('/games/create', response_model=GameSchema, description='Создание новой игры')
-async def create_new_game(
-        *,
-        user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_async_session),
-        game: GameCreateSchema,
-):
-    game = await GameService(db).create_game(creator=user, game_data=game)
-    return game
-
-
 @router.get(
     '/games',
-    response_model=list[GameAvailableListSchema],
+    response_model=list[GameSchemaOut],
     description='Получить список игр, к которым можно присоединиться (как игрок или зритель)',
 )
 async def read_available_games(

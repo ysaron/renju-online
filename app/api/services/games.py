@@ -4,7 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.game import GameMode, Game, PlayerRole
 from app.models.user import User
-from app.schemas.game import GameModeInGameSchema, GameCreateSchema, GameRules
+from app.schemas.game import (
+    GameModeInGameSchema,
+    GameCreateSchema,
+    GameRules,
+)
 from app.enums.game import PlayerRoleEnum, GameStateEnum
 
 

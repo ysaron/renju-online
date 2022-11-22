@@ -235,6 +235,17 @@ function wsDispatcher() {
             case 'online_counter':
                 updateTotalOnline(data.total);
                 break;
+            case 'game_created':
+                // НАМИ была создана игра --> открываем ее
+                openGame(data.game, data.my_role);
+                break;
+            case 'game_added':
+                // была создана игра --> обновляем список GameList
+                addGameInList(data.game);
+                break;
+            case 'open_game':
+                // открываем игру как игрок или зритель
+                break;
             default:
                 break
         }

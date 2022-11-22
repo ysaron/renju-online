@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from uuid import UUID
+from typing import Any
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
+from fastapi.encoders import jsonable_encoder
 
 
 @dataclass(frozen=True)
@@ -37,12 +39,12 @@ class ConnectionManager:
             print('Websocket not found!')
         return ws
 
-    async def send_message(self, websocket: WebSocket, message: dict) -> None:
-        await websocket.send_json(message)
+    async def send_message(self, websocket: WebSocket, message: Any) -> None:
+        await websocket.send_json(jsonable_encoder(message))
 
-    async def broadcast(self, message: dict) -> None:
+    async def broadcast(self, message: Any) -> None:
         for conn in self.active_connections.all:
-            await conn.websocket.send_json(message)
+            await conn.websocket.send_json(jsonable_encoder(message))
 
     async def get_online(self) -> int:
         return len(self.active_connections.all)

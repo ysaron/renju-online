@@ -296,6 +296,7 @@ function sendFormLogin(event) {
         .then(response => {
             getMe(response.access_token).then(myData => {
                 sessionStorage.setItem('username', myData.name);
+                sessionStorage.setItem('id', myData.id);
             })
                 .then(myData => {
                     let username = sessionStorage.getItem('username')
@@ -387,6 +388,7 @@ function sendFormResetPassword(event) {
 function logout() {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("username");
+    sessionStorage.removeItem("id");
 
     hideAllScreens();
     screenMainNotLoggedShow();
