@@ -1,5 +1,11 @@
 const gameList = document.getElementById("game-list")
 const gameListLoader = makeLoaderGrid("gamelist-loader")
+const privateGameInput = document.getElementById("private-game-id")
+const joinPrivateGameBtn = document.getElementById("join-private-game")
+const spectatePrivateGameBtn = document.getElementById("spectate-private-game")
+
+joinPrivateGameBtn.addEventListener("click", joinGameByID)
+spectatePrivateGameBtn.addEventListener("click", spectateGameByID)
 
 for (let btn of btnsJoinGame) {btn.addEventListener("click", openGameList)}
 
@@ -13,8 +19,6 @@ function showScreenGameList() {
 function openGameList() {
     showScreenGameList();
     updateGameList();
-
-    send({action: 'example', data: 'eome data !!1'});
 }
 
 function clearGameList() {
@@ -128,18 +132,7 @@ function addGameInList(game) {
         indicator.classList.add("indicator", "indicator-empty");
         indicatorBlock.appendChild(indicator);
     }
-    if (game.player_1) {
-        indicatorBlock.children[0].classList.remove("indicator-empty");
-        indicatorBlock.children[0].classList.add("indicator-green");
-    }
-    if (game.player_2) {
-        indicatorBlock.children[1].classList.remove("indicator-empty");
-        indicatorBlock.children[1].classList.add("indicator-green");
-    }
-    if (game.player_3) {
-        indicatorBlock.children[2].classList.remove("indicator-empty");
-        indicatorBlock.children[2].classList.add("indicator-green");
-    }
+    lightUpPlayerIndicators(game, indicatorBlock);
 
     playersBlock.appendChild(indicatorBlock);
     gameItem.appendChild(playersBlock);
@@ -153,8 +146,68 @@ function addGameInList(game) {
     gameItem.appendChild(spectatorsBlock);
 
     // --- Control buttons ---------------------------------------------------------------------
-    gameItem.appendChild(joinSpectateBtnsTemp.content.firstElementChild.cloneNode(true));
+    let joinBtn = joinBtnTemp.content.firstElementChild.cloneNode(true);
+    let spectateBtn = spectateBtnTemp.content.firstElementChild.cloneNode(true);
+    joinBtn.addEventListener("click", joinGameFromList);
+    console.log("joinBTN: ", joinBtn);
+    spectateBtn.addEventListener("click", spectateGameFromList);
+    gameItem.appendChild(joinBtn);
+    gameItem.appendChild(spectateBtn);
 
+    // -----------------------------------------------------------------------------------------
     gameList.appendChild(gameItem);
+}
 
+function lightUpPlayerIndicators(game, indicatorBlock) {
+    if (game.player_1) {
+        indicatorBlock.children[0].classList.remove("indicator-empty");
+        indicatorBlock.children[0].classList.add("indicator-green");
+    }
+    if (game.player_2) {
+        indicatorBlock.children[1].classList.remove("indicator-empty");
+        indicatorBlock.children[1].classList.add("indicator-green");
+    }
+    if (game.player_3) {
+        indicatorBlock.children[2].classList.remove("indicator-empty");
+        indicatorBlock.children[2].classList.add("indicator-green");
+    }
+}
+
+function joinGameFromList(event) {
+    console.log("event", event);
+    console.log("target", event.currentTarget);
+    let game_id = event.currentTarget.parentNode.dataset.id;
+    joinGame(game_id);
+}
+
+function joinGameByID() {
+    game_id = privateGameInput.value;
+    joinGame(game_id);
+}
+
+function joinGame(game_id) {
+    console.log("game_id: ", game_id);
+    send({action: "join_game", game_id: game_id});
+}
+
+function spectateGameFromList() {
+}
+
+function spectateGameByID() {
+}
+
+function spectateGame(game_id) {
+}
+
+function getGameItem(game_id) {
+    for (let gameItem of gameList.children) {
+        if (gameItem.dataset.id == game_id) return gameItem;
+    }
+}
+
+function playerJoinedList(game, playerName) {
+    if (game.is_private) return;
+    let gameItem = getGameItem(game.id);
+    let indicatorBlock = gameItem.querySelector(".player-indicators");
+    lightUpPlayerIndicators(game, indicatorBlock);
 }

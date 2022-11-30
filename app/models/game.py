@@ -30,6 +30,7 @@ class PlayerRole(Base):
         default=PlayerRoleEnum.first.value,
     )
     ready = Column(Boolean, default=False)
+    result = Column(Enum(GameResultEnum))
 
     game = relationship('Game', back_populates='players', lazy='selectin')
     player = relationship('User', back_populates='games', lazy='selectin')
@@ -63,16 +64,16 @@ class Game(UuidIdMixin, Base):
 
 class GameResult(Base):
     id = Column(Integer, primary_key=True)
-    result = Column(Enum(GameResultEnum))
+    # result = Column(Enum(GameResultEnum))
     cause = Column(Enum(GameResultCauseEnum))
 
     # One To One (Game)
     game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
     game = relationship('Game', back_populates='result', lazy='selectin')
 
-    # Many to One (User)
-    winner_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
-    winner = relationship('User', back_populates='victories', lazy='selectin')
+    # # Many to One (User)
+    # winner_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
+    # winner = relationship('User', back_populates='victories', lazy='selectin')
 
 
 class GameMode(Base):

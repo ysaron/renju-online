@@ -36,6 +36,7 @@ class Config(BaseSettings):
     REDIS_HOST_NAME: str = 'redis'
     REDIS_PORT: int = 6379
     REDIS_HOST_PASSWORD: str = ''
+    MAX_SPECTATORS_NUM: int = 5
 
     class Config:
         env_file = '.env.dev'

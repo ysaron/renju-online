@@ -3,6 +3,7 @@
     --blue: #000099;
     --green: #009900;
     --red: #cc0000;
+    --grey: #666666;
 }
 
 body {
@@ -196,17 +197,6 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     border-bottom-style: solid
 }
 
-.cell {
-    font-family: "Georgia", cursive;
-    width: 100px;
-    height: 100px;
-    border: 1px solid #333333;
-    cursor: pointer;
-    box-shadow: 0 0 0 1px #333333;
-    font-size: 70px;
-    line-height: 100px;
-}
-
 .game-on {
     display: block;
 }
@@ -286,6 +276,123 @@ div.icon-wrapper {
     justify-content: space-between;
 }
 
+.player {
+    display: flex;
+    width: 25%;
+    height: 50px;
+    line-height: 50px;
+    border: 2px solid var(--dark);
+    border-radius: 10px;
+    background-color: white;
+    color: var(--dark);
+    opacity: 0.7;
+    cursor: pointer;
+}
+.player:hover {
+    opacity: 1;
+}
+.player .player-chip-icon, .player .player-ready {
+    flex-basis: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.player .player-name {
+    text-align: center;
+    line-height: 50px;
+    flex-basis: 60%;
+}
+.player-active {
+    background-color: var(--green);
+}
+.player-none {
+    pointer-events: none;
+    background: transparent;
+    border-color: var(--grey);
+}
+#game-players-section {
+    visibility: hidden;
+}
+.chip {
+    border-radius: 50%;
+    height: 95%;
+    aspect-ratio: 1 / 1;
+    /*self-align: center;*/
+}
+.chip-icon {
+    height: 70%;
+    opacity: 1;
+}
+.chip-white {
+    border: 1px solid black;
+    background-color: white;
+}
+.chip-black {
+    border: 1px solid white;
+    background-color: var(--dark);
+}
+.chip-gray {
+    border: 1px solid var(--dark);
+    background-color: var(--grey);
+}
+
+.time-panel {
+    width: 13%;
+    border-radius: 10px;
+    background: white;
+}
+.moves-panel {
+    width: 13%;
+    border-radius: 10px;
+    background: white;
+}
+.board-wrapper {
+    width: 70%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    position: relative;
+}
+.board {
+    width: 96%;
+    height: 96%;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(204, 153, 0, 0.9);
+}
+.cell {
+    position: relative;
+    z-index: 0;
+
+    color: white;
+    font-size: 5px;
+}
+.cell::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: -1;
+    background: rgba(40, 40, 40, 0.5);
+}
+.cell::after {
+    content: '';
+    position: absolute;
+    right: 50%;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    z-index: -1;
+    background: rgba(40, 40, 40, 0.5);
+}
+
 .game-item {
     display: flex;
     flex-wrap: wrap;
@@ -358,6 +465,11 @@ div.icon-wrapper {
 .btn-join:disabled {
     background-color: #b22222;
     pointer-events: none;
+}
+.btn-ready {
+    display: none;
+}
+.btn-blocked {
 }
 
 .mode-block {
@@ -444,7 +556,7 @@ div.icon-wrapper {
     radial-gradient(var(--dark) 15%, transparent 17%) 8px 8px,
     radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
     radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
-    background-color: #666666;
+    background-color: var(--grey);
     background-size: 16px 16px;
 
     font-family: monospace;

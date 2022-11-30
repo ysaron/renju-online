@@ -40,3 +40,15 @@ class TokenExpired(Exception):
 
 class BadCredentials(Exception):
     pass
+
+
+class NoEmptySeats(Exception):
+    pass
+
+
+class UnfinishedGame(Exception):
+    pass
+
+
+class NoGameFound(Exception):
+    pass

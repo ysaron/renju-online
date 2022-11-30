@@ -8,14 +8,30 @@ class BaseMessageSchema(BaseModel):
     action: str
 
 
-class GameCreatedMessage(BaseMessageSchema):
-    action: str = 'game_created'
+class OpenGameMessage(BaseMessageSchema):
+    action: str = 'open_game'
     game: GameSchemaOut
-    my_role: PlayerRoleEnum | None = None
+    my_role: PlayerRoleEnum
 
 
 class GameAddedMessage(BaseMessageSchema):
     action: str = 'game_added'
+    game: GameSchemaOut
+
+
+class PlayerJoinedMessage(BaseMessageSchema):
+    action: str = 'player_joined'
+    game: GameSchemaOut
+    player_name: str
+    player_role: PlayerRoleEnum
+
+
+class PlayerJoinedListMessage(PlayerJoinedMessage):
+    action: str = 'player_joined_list'
+
+
+class SpectatorJoinedMessage(BaseMessageSchema):
+    action: str = 'spectator_joined'
     game: GameSchemaOut
 
 

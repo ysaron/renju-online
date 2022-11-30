@@ -17,6 +17,6 @@ class User(UuidIdMixin, Base):
     is_superuser = Column(Boolean, default=False)
 
     # One to Many
-    games = relationship(PlayerRole, back_populates='player')
-    moves = relationship(Move, back_populates='player')
-    victories = relationship(GameResult, back_populates='winner')
+    games = relationship(PlayerRole, back_populates='player', lazy='selectin')
+    moves = relationship(Move, back_populates='player', lazy='selectin')
+    # victories = relationship(GameResult, back_populates='winner')

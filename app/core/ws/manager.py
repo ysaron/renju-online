@@ -21,6 +21,9 @@ class WSConnectionList:
             if conn.user_id == user_id:
                 return conn.websocket
 
+    def get_websocket_list(self, user_ids: list[UUID]) -> list[WebSocket]:
+        return [conn.websocket for conn in self.all if conn.user_id in user_ids]
+
 
 class ConnectionManager:
     def __init__(self) -> None:
@@ -43,10 +46,17 @@ class ConnectionManager:
         await websocket.send_json(jsonable_encoder(message))
 
     async def broadcast(self, message: Any) -> None:
+        """ Отправляет сообщение всем подключенным юзерам """
         for conn in self.active_connections.all:
             await conn.websocket.send_json(jsonable_encoder(message))
 
+    async def limited_broadcast(self, user_ids: list[UUID], message: Any) -> None:
+        """ Отправляет сообщение группе юзеров """
+        for ws in self.active_connections.get_websocket_list(user_ids):
+            await ws.send_json(jsonable_encoder(message))
+
     async def get_online(self) -> int:
+        """ Возвращает число текущих соединений """
         return len(self.active_connections.all)
 
 

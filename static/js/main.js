@@ -6,6 +6,7 @@ const screenMainNotLogged = document.getElementById("mainscreen-not-logged")
 const screenMainLogged = document.getElementById("mainscreen-logged")
 const screenGameCreation = document.getElementById("game-creation")
 const screenGameList = document.getElementById("game-list-screen")
+const screenGame = document.getElementById("game-screen")
 
 const modalSignup = document.getElementById("modal-signup")
 const modalLogin = document.getElementById("modal-login")
@@ -41,7 +42,8 @@ const commonData = document.getElementById("common-data")
 const origin = `http://${commonData.dataset.remotehost}:${commonData.dataset.port}`
 const wsURL = `ws://${commonData.dataset.remotehost}:${commonData.dataset.port}/renju/ws`
 
-const joinSpectateBtnsTemp = document.getElementById("join-spectate-btns");
+const joinBtnTemp = document.getElementById("join-btn-template");
+const spectateBtnTemp = document.getElementById("spectate-btn-template");
 const svgEyeTemp = document.getElementById("svg-eye");
 
 const playerRoles = ["1", "2", "3"];
@@ -215,36 +217,50 @@ function makeLoaderGrid(id) {
 function openWS() {
     let token = getToken();
     ws = new WebSocket(`${wsURL}?querytoken=${token}`);
-    console.log('example', `${wsURL}?querytoken=${token}`)
+    console.log("example", `${wsURL}?querytoken=${token}`)
     setMeOnline();
     wsDispatcher();
 }
 
 function wsDispatcher() {
     ws.onopen = function (event) {
-        console.log('open', event);
+        console.log("open", event);
     }
 
     ws.onmessage = function (event) {
         let data = JSON.parse(event.data);
-        console.log('data.action', data.action);
+        console.log("data.action", data.action);
         switch (data.action) {
-            case 'example':
-                console.log('data', data)
-                break
-            case 'online_counter':
+            case "online_counter":
                 updateTotalOnline(data.total);
                 break;
-            case 'game_created':
-                // НАМИ была создана игра --> открываем ее
-                openGame(data.game, data.my_role);
-                break;
-            case 'game_added':
-                // была создана игра --> обновляем список GameList
+            case "game_added":
+                // была создана игра --> обновляем список GameList (+ gameBlock в список)
+                // в НАЧАЛО списка
                 addGameInList(data.game);
                 break;
-            case 'open_game':
-                // открываем игру как игрок или зритель
+            case "open_game":
+                // открываем игру как игрок или зритель, рендерим экран игры
+                openGame(data.game, data.my_role);
+                break;
+            case "player_joined":
+                // отражаем изменения на экране игры (update playerBlock)
+                playerJoined(data.game, data.player_name);
+                console.log("Game: ", data.game);
+                break;
+            case "player_joined_list":
+                // отражаем изменения на экране списка игр (индикатор, возможная блокировка кнопки JOIN)
+                playerJoinedList(data.game, data.player_name);
+                break;
+            case "spectator_joined":
+                // отражаем изменения на экране игры (инкремент счетчика зрителей)
+                spectatorJoined(data.game);
+                break;
+            case "spectator_joined_list":
+                // отражаем изменения на экране списка игр (инкремент счетчика зрителей)
+                break;
+            case "error":
+                alert(data.detail);
                 break;
             default:
                 break

@@ -1,7 +1,10 @@
+import uuid
+from typing import Literal
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import config
 from app.models.game import GameMode, Game, PlayerRole
 from app.models.user import User
 from app.schemas.game import (
@@ -10,6 +13,7 @@ from app.schemas.game import (
     GameRules,
 )
 from app.enums.game import PlayerRoleEnum, GameStateEnum
+from app.core import exceptions
 
 
 class GameService:
@@ -19,7 +23,7 @@ class GameService:
 
     async def get_modes(self, mode_ids: list[int] | None = None) -> list[GameMode]:
         stmt = select(GameMode)
-        if mode_ids:
+        if mode_ids is not None:
             stmt = stmt.where(GameMode.id.in_(mode_ids))
         modes = await self.__db.scalars(stmt)
         return modes.all()
@@ -31,6 +35,9 @@ class GameService:
         return self.define_rules(chosen_modes)
 
     async def create_game(self, creator: User, game_data: GameCreateSchema) -> Game:
+        if await self.__check_user_active_games(creator):
+            raise exceptions.UnfinishedGame()
+
         chosen_modes = await self.get_modes(mode_ids=[m.id for m in game_data.modes])
         rules = self.define_rules(chosen_modes)
 
@@ -89,3 +96,81 @@ class GameService:
         ))
         available_games = await self.__db.scalars(stmt)
         return available_games.all()
+
+    @staticmethod
+    async def get_user_games(
+            user: User,
+            scope: Literal['nonstarted', 'active', 'finished', 'all'] = 'all',
+    ) -> list[Game]:
+        match scope:
+            case 'nonstarted':
+                return [pr.game for pr in user.games if pr.game.state == GameStateEnum.created]
+            case 'active':
+                return [pr.game for pr in user.games if pr.ready and pr.result is not None]
+            case 'finished':
+                return [pr.game for pr in user.games if pr.game.state == GameStateEnum.finished]
+            case _:
+                return [pr.game for pr in user.games]
+
+    async def get_game(self, game_id: uuid.UUID) -> Game:
+        stmt = select(Game).where(Game.id == game_id)
+        game = await self.__db.scalars(stmt)
+        return game.one_or_none()
+
+    async def join_game(self, player: User, game_id: uuid.UUID) -> tuple[Game, PlayerRoleEnum]:
+        """
+        Присоединение нового игрока
+
+        :return: объект игры и роль игрока в ней
+        :raise NoGameFound: если игры с данным ID не существует
+        :raise NoEmptySeats: если все места для игроков заняты
+        :raise UnfinishedGame: если юзер все еще участвует как игрок в другой игре
+        """
+        if (game := await self.get_game(game_id)) is None:
+            raise exceptions.NoGameFound()
+        if (role := await self.__get_empty_seat(game)) is None:
+            raise exceptions.NoEmptySeats()
+        if await self.__check_user_active_games(player):
+            raise exceptions.UnfinishedGame()
+        return await self.__write_player_to_game(player=player, game=game, role=role), role
+
+    async def __write_player_to_game(self, player: User, game: Game, role: PlayerRoleEnum) -> Game:
+        """ Записывает юзера в игру как игрока """
+        pr = PlayerRole(role=role, player=player)
+        game.players.append(pr)
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game
+
+    async def __check_user_active_games(self, user: User) -> bool:
+        """ Возвращает True, если юзер имеет незаконченную игру """
+        # Юзер не закончил игру, если ready уже нажато, но результат игры еще не записан
+        return bool(await self.get_user_games(user, scope='active'))
+
+    async def __get_empty_seat(self, game: Game) -> PlayerRoleEnum | None:
+        """
+        Определяет роль (номер) присоединяющегося игрока. Если занято место '1' - возвращается '2'.
+        Если занято '2' и игра для троих игроков - возвращается '3'.
+
+        :return: роль, в которой игрок будет прикреплен к игре; None, если свободных мест нет
+        """
+        player_enums = [PlayerRoleEnum.first, PlayerRoleEnum.second]
+        if game.num_players == 3:
+            player_enums.append(PlayerRoleEnum.third)
+        for pl_enum in player_enums:
+            player = await self.__get_player_by_role(game, role=pl_enum)
+            if player is None:
+                return pl_enum
+
+    @staticmethod
+    async def __get_player_by_role(game: Game, role: PlayerRoleEnum) -> PlayerRole | None:
+        for player in game.players:
+            if player.role == role:
+                return player
+
+    @staticmethod
+    def __check_spectator_seats(game: Game) -> bool:
+        """ Возвращает True, если у игры есть свободное место для зрителя """
+        spectator_enums = [PlayerRoleEnum.spectator]
+        spectators = [player for player in game.players if player.role in spectator_enums]
+        return len(spectators) < config.MAX_SPECTATORS_NUM

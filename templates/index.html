@@ -104,6 +104,49 @@
       <h2>Available public games</h2>
       <div id="game-list" class="section section-vert"></div>
     </div>
+    <div id="game-screen" class="screen screen-game">
+      <div class="section section-top">
+        <button type="button" class="btn btn-icon btn-home">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+        </button>
+        <div id="game-id-block"></div>
+      </div>
+      <div id="game-players-section" class="section section-top">
+        <div class="player player-none" id="player-white">
+          <div class="player-chip-icon"><div class="chip chip-icon chip-white"></div></div>
+          <div class="player-name">Player1</div>
+          <div class="player-ready"></div>
+        </div>
+        <div class="player player-none" id="player-black">
+          <div class="player-chip-icon"><div class="chip chip-icon chip-black"></div></div>
+          <div class="player-name">Player2</div>
+          <div class="player-ready"></div>
+        </div>
+        <div class="player player-none" id="player-gray" style="display: none;">
+          <div class="player-chip-icon"><div class="chip chip-icon chip-gray"></div></div>
+          <div class="player-name">Player3</div>
+          <div class="player-ready"></div>
+        </div>
+      </div>
+      <div class="section">
+        <div id="time-panel" class="time-panel">
+          <div id="ready-block">
+            <div id="game-participate-mode" style="display: none;">Spectator Mode</div>
+            <button type="button" class="btn btn-ready btn-blocked" id="btn-ready">Ready!</button>
+          </div>
+        </div>
+        <div id="board-wrapper" class="board-wrapper">
+          <div id="board" class="board" style="background: no-repeat center/300% url({{ url_for('static', path='/images/board_wood.png') }})"></div>
+        </div>
+        <div id="moves-panel" class="moves-panel"></div>
+      </div>
+      <div class="section">
+        <button type="button" class="btn btn-large">Pass</button>
+        <button type="button" class="btn btn-large">Concede</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -243,20 +286,21 @@
   </div>
 </div>
 
-<template id="join-spectate-btns">
-<div>
+<template id="join-btn-template">
+  <button type="button" class="btn btn-icon btn-join-game" title="Join">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  </button>
+</template>
+
+<template id="spectate-btn-template">
   <button type="button" class="btn btn-icon btn-spectate-game" title="Spectate">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
       <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   </button>
-  <button type="button" class="btn btn-icon btn-join-game" title="Join">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  </button>
-</div>
 </template>
 
 <template id="svg-eye">
