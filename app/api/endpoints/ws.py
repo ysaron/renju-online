@@ -94,6 +94,11 @@ class RenjuWSEndpoint(WebSocketActions):
                 websocket=connection.websocket,
                 message=message.ErrorMessage(detail='Invalid game ID'),
             )
+        except exceptions.AlreadyInGame:
+            await self.manager.send_message(
+                websocket=connection.websocket,
+                message=message.ErrorMessage(detail='You are already connected to this game.'),
+            )
         except exceptions.NoEmptySeats:
             await self.manager.send_message(
                 websocket=connection.websocket,

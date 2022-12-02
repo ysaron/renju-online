@@ -123,16 +123,25 @@ class GameService:
 
         :return: объект игры и роль игрока в ней
         :raise NoGameFound: если игры с данным ID не существует
+        :raise AlreadyInGame: если юзер уже записан в игру
         :raise NoEmptySeats: если все места для игроков заняты
         :raise UnfinishedGame: если юзер все еще участвует как игрок в другой игре
         """
         if (game := await self.get_game(game_id)) is None:
             raise exceptions.NoGameFound()
+        if await self.__check_user_in_game(user=player, game=game):
+            raise exceptions.AlreadyInGame()
         if (role := await self.__get_empty_seat(game)) is None:
             raise exceptions.NoEmptySeats()
         if await self.__check_user_active_games(player):
             raise exceptions.UnfinishedGame()
-        return await self.__write_player_to_game(player=player, game=game, role=role), role
+        game = await self.__write_player_to_game(player=player, game=game, role=role)
+        return game, role
+
+    @staticmethod
+    async def __check_user_in_game(user: User, game: Game) -> bool:
+        """ Возвращает True, если юзер записан в игру как игрок или зритель """
+        return any([pr.player.id == user.id for pr in game.players])
 
     async def __write_player_to_game(self, player: User, game: Game, role: PlayerRoleEnum) -> Game:
         """ Записывает юзера в игру как игрока """

@@ -155,7 +155,7 @@ function addGameInList(game) {
     gameItem.appendChild(spectateBtn);
 
     // -----------------------------------------------------------------------------------------
-    gameList.appendChild(gameItem);
+    gameList.insertBefore(gameItem, gameList.firstChild);
 }
 
 function lightUpPlayerIndicators(game, indicatorBlock) {
