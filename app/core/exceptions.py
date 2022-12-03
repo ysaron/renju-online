@@ -52,7 +52,3 @@ class UnfinishedGame(Exception):
 
 class NoGameFound(Exception):
     pass
-
-
-class AlreadyInGame(Exception):
-    pass

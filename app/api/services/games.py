@@ -117,26 +117,26 @@ class GameService:
         game = await self.__db.scalars(stmt)
         return game.one_or_none()
 
-    async def join_game(self, player: User, game_id: uuid.UUID) -> tuple[Game, PlayerRoleEnum]:
+    async def join_game(self, player: User, game_id: uuid.UUID) -> tuple[Game, PlayerRoleEnum, bool]:
         """
         Присоединение нового игрока
 
-        :return: объект игры и роль игрока в ней
+        :return: объект игры; роль игрока в ней; True, если игрок уже был записан и игра будет переоткрыта
         :raise NoGameFound: если игры с данным ID не существует
-        :raise AlreadyInGame: если юзер уже записан в игру
         :raise NoEmptySeats: если все места для игроков заняты
         :raise UnfinishedGame: если юзер все еще участвует как игрок в другой игре
         """
         if (game := await self.get_game(game_id)) is None:
             raise exceptions.NoGameFound()
         if await self.__check_user_in_game(user=player, game=game):
-            raise exceptions.AlreadyInGame()
+            role = await self.__get_role_by_player(game, player)
+            return game, role, True
         if (role := await self.__get_empty_seat(game)) is None:
             raise exceptions.NoEmptySeats()
         if await self.__check_user_active_games(player):
             raise exceptions.UnfinishedGame()
         game = await self.__write_player_to_game(player=player, game=game, role=role)
-        return game, role
+        return game, role, False
 
     @staticmethod
     async def __check_user_in_game(user: User, game: Game) -> bool:
@@ -173,9 +173,15 @@ class GameService:
 
     @staticmethod
     async def __get_player_by_role(game: Game, role: PlayerRoleEnum) -> PlayerRole | None:
-        for player in game.players:
-            if player.role == role:
-                return player
+        for pr in game.players:
+            if pr.role == role:
+                return pr
+
+    @staticmethod
+    async def __get_role_by_player(game: Game, player: User) -> PlayerRoleEnum | None:
+        for pr in game.players:
+            if pr.player.id == player.id:
+                return pr.role
 
     @staticmethod
     def __check_spectator_seats(game: Game) -> bool:

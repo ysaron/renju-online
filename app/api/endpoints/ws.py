@@ -64,7 +64,7 @@ class RenjuWSEndpoint(WebSocketActions):
             game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
             async with async_session_context() as db:
                 user = await UserService(db).get_user_by_id(connection.user_id)
-                game, role = await GameService(db).join_game(player=user, game_id=game_input_data.id)
+                game, role, reopen = await GameService(db).join_game(player=user, game_id=game_input_data.id)
                 game_data = GameSchemaOut.from_orm(game)
                 # открытие игры присоединившимся игроком
                 await self.manager.send_message(
@@ -74,6 +74,10 @@ class RenjuWSEndpoint(WebSocketActions):
                         my_role=role,
                     ),
                 )
+                if reopen:
+                    # Игра открывается заново уже участвующим игроком, уведомлять всех не нужно
+                    return
+
                 # limited broadcast для игроков и зрителей игры
                 await self.manager.limited_broadcast(
                     user_ids=[pr.player.id for pr in game.players],
@@ -93,11 +97,6 @@ class RenjuWSEndpoint(WebSocketActions):
             await self.manager.send_message(
                 websocket=connection.websocket,
                 message=message.ErrorMessage(detail='Invalid game ID'),
-            )
-        except exceptions.AlreadyInGame:
-            await self.manager.send_message(
-                websocket=connection.websocket,
-                message=message.ErrorMessage(detail='You are already connected to this game.'),
             )
         except exceptions.NoEmptySeats:
             await self.manager.send_message(

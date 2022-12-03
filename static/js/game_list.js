@@ -148,9 +148,8 @@ function addGameInList(game) {
     // --- Control buttons ---------------------------------------------------------------------
     let joinBtn = joinBtnTemp.content.firstElementChild.cloneNode(true);
     let spectateBtn = spectateBtnTemp.content.firstElementChild.cloneNode(true);
-    joinBtn.addEventListener("click", joinGameFromList);
-    console.log("joinBTN: ", joinBtn);
-    spectateBtn.addEventListener("click", spectateGameFromList);
+    joinBtn.addEventListener("click", joinGameFromParent);
+    spectateBtn.addEventListener("click", spectateGameFromParent);
     gameItem.appendChild(joinBtn);
     gameItem.appendChild(spectateBtn);
 
@@ -173,7 +172,7 @@ function lightUpPlayerIndicators(game, indicatorBlock) {
     }
 }
 
-function joinGameFromList(event) {
+function joinGameFromParent(event) {
     console.log("event", event);
     console.log("target", event.currentTarget);
     let game_id = event.currentTarget.parentNode.dataset.id;
@@ -190,7 +189,7 @@ function joinGame(game_id) {
     send({action: "join_game", game_id: game_id});
 }
 
-function spectateGameFromList() {
+function spectateGameFromParent() {
 }
 
 function spectateGameByID() {
