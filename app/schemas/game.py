@@ -94,6 +94,7 @@ class GameSchema(GameCreateSchema):
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
     with_myself: bool = Field(..., description='Игра с самим собой')
+    board: list[list[int]]
 
     def get_player_by_role(self, role: PlayerRoleEnum) -> PlayerSchema | None:
         for player in self.players:

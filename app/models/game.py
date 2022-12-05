@@ -56,10 +56,12 @@ class Game(UuidIdMixin, Base):
     moves = relationship('Move', back_populates='game', lazy='selectin')
 
     time_limit = Column(Integer)
-    board_size = Column(Integer, default=19)
+    board_size = Column(Integer, default=15)
     classic_mode = Column(Boolean, default=False)
     with_myself = Column(Boolean, default=False)
     num_players = Column(Integer, default=2)
+
+    board = Column(psql.ARRAY(Integer, dimensions=2))
 
 
 class GameResult(Base):

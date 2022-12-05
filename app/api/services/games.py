@@ -16,6 +16,24 @@ from app.enums.game import PlayerRoleEnum, GameStateEnum
 from app.core import exceptions
 
 
+class Board(list[list[int]]):
+    def __init__(self, iterable: list[list[int]]):
+        self.__validate_init(iterable)
+        super().__init__(iterable)
+
+    @classmethod
+    def default(cls, fill: int = 0, *, size: int) -> 'Board':
+        array = [[fill for _ in range(size)] for _ in range(size)]
+        return cls(array)
+
+    @staticmethod
+    def __validate_init(iterable: list[list[int]]) -> None:
+        if not all(isinstance(obj, list) for obj in iterable):
+            raise TypeError('Board must be 2D list.')
+        if not all(len(obj) == len(iterable) for obj in iterable):
+            raise ValueError('Board must be square.')
+
+
 class GameService:
 
     def __init__(self, db_session: AsyncSession):
@@ -49,6 +67,8 @@ class GameService:
         game.with_myself = rules.with_myself
         if rules.three_players:
             game.num_players = 3
+
+        game.board = Board.default(size=rules.board_size)
 
         pr = PlayerRole(role=PlayerRoleEnum.first)
         pr.player = creator
