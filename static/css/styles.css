@@ -362,7 +362,7 @@ div.icon-wrapper {
     grid-row-gap: 0px;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     background: rgba(204, 153, 0, 0.9);
 }
 .cell {
@@ -391,6 +391,31 @@ div.icon-wrapper {
     width: 3px;
     z-index: -1;
     background: rgba(40, 40, 40, 0.5);
+}
+
+.axis {
+    display: grid;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    position: absolute;
+}
+#x-axis {
+    grid-template-rows: 1fr;
+    height: 4%;
+    width: 96%;
+    bottom: 0;
+    right: 0;
+}
+#y-axis {
+    grid-template-columns: 1fr;
+    height: 96%;
+    width: 4%;
+    top: 0;
+    left: 0;
+}
+.axis-cell {
+    text-align: center;
+    line-height: 96%;
 }
 
 .game-item {

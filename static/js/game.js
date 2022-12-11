@@ -2,11 +2,15 @@ const timePanel = document.getElementById("time-panel")
 const movesPanel = document.getElementById("moves-panel")
 const boardWrapper = document.getElementById("board-wrapper")
 const boardBlock = document.getElementById("board")
+const xAxis = document.getElementById("x-axis")
+const yAxis = document.getElementById("y-axis")
 const gamePlayersSection = document.getElementById("game-players-section")
 const gameIdBlock = document.getElementById("game-id-block")
 const readyBlock = document.getElementById("ready-block")
 const gameParticipateMode = document.getElementById("game-participate-mode")
 const btnReady = document.getElementById("btn-ready")
+
+let currentBoards = {};
 
 function openGame(game, my_role) {
     console.log("game:", game);
@@ -14,7 +18,8 @@ function openGame(game, my_role) {
     hideAllScreens();
     screenGame.style.display = "flex";
 
-    buildBoard(game.board_size);        // TODO: рендер борды из game.board
+    currentBoards[game.id] = board;
+    buildBoard(game.board);
 
     renderGameInfo(game);
     showPlayersSection(game);
@@ -37,24 +42,48 @@ function playerLeft(game, playerName) {
 function spectatorLeft(game) {
 }
 
-function buildBoard(numRowItems) {
-    boardBlock.style.gridTemplateColumns = `repeat(${numRowItems}, 1fr)`;
-    boardBlock.style.gridTemplateRows = `repeat(${numRowItems}, 1fr)`;
-    let numCells = numRowItems * numRowItems;
-    for (let i = numCells; i >= 1; i--) {
-        let cell = document.createElement("div");
-        cell.classList.add("cell");
-        let x = Math.floor(i % numRowItems);
-        if (x == 0) x = numRowItems;
-        let y = Math.ceil(i / numRowItems);
-//        cell.innerHTML = `[${x} ${y}]`;
-//        cell.innerHTML = i;
+function buildBoard(board) {
+    // board: 2D Array 15х15 or 30х30
+    let cellsArr = [];
+    for (let y = 1; y <= board.length; y++) {
+        let cellsRow = [];
+        for (let x = 1; x <= board[y-1].length; x++) {
+            let cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.innerHTML = `${x}-${y}`;
+            cell.dataset.x = x;
+            cell.dataset.y = y;
+            cellsRow.push(cell);
+        }
+        cellsArr.push(cellsRow);
+    }
+    cellsArr.reverse();
 
-        // Записывать х & у в data-x & data-y соотв.
-        // Добавить еще 2 сетки для координат. Х: только Columns; Y: только Rows устанавливать.
-        // Им - тоже соотв. data-x OR data-y.
+    boardBlock.style.gridTemplateColumns = `repeat(${board.length}, 1fr)`;
+    boardBlock.style.gridTemplateRows = `repeat(${board.length}, 1fr)`;
 
-        boardBlock.appendChild(cell);
+    for (let row of cellsArr) {
+        for (let cell of row) {
+            boardBlock.appendChild(cell);
+        }
+    }
+
+    // Axes
+    xAxis.style.gridTemplateColumns = `repeat(${board[0].length}, 1fr)`;
+    yAxis.style.gridTemplateRows = `repeat(${board.length}, 1fr)`;
+    for (let y = board.length; y >= 1; y--) {
+        let axisCell = document.createElement("div");
+        axisCell.classList.add("axis-cell");
+        axisCell.innerHTML = y;
+        axisCell.dataset.y = y;
+        yAxis.appendChild(axisCell);
+    }
+    for (let x = 1; x <= board.length; x++) {
+        let axisCell = document.createElement("div");
+        axisCell.classList.add("axis-cell");
+        axisCell.innerHTML = x;
+        axisCell.dataset.y = x;
+        xAxis.appendChild(axisCell);
     }
 }
 
