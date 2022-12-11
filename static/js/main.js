@@ -236,7 +236,6 @@ function wsDispatcher() {
                 break;
             case "game_added":
                 // была создана игра --> обновляем список GameList (+ gameBlock в список)
-                // в НАЧАЛО списка
                 addGameInList(data.game);
                 break;
             case "open_game":

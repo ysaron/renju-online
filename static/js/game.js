@@ -18,7 +18,9 @@ function openGame(game, my_role) {
     hideAllScreens();
     screenGame.style.display = "flex";
 
-    currentBoards[game.id] = board;
+    if (!currentBoards[game.id]) {
+        currentBoards[game.id] = board;
+    }
     buildBoard(game.board);
 
     renderGameInfo(game);
@@ -44,6 +46,7 @@ function spectatorLeft(game) {
 
 function buildBoard(board) {
     // board: 2D Array 15х15 or 30х30
+    clearBoard();
     let cellsArr = [];
     for (let y = 1; y <= board.length; y++) {
         let cellsRow = [];
@@ -85,6 +88,12 @@ function buildBoard(board) {
         axisCell.dataset.y = x;
         xAxis.appendChild(axisCell);
     }
+}
+
+function clearBoard() {
+    boardBlock.innerHTML = "";
+    xAxis.innerHTML = "";
+    yAxis.innerHTML = "";
 }
 
 function renderGameInfo(game) {
