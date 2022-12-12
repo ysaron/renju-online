@@ -141,7 +141,7 @@ class GameService:
         """
         Присоединение нового игрока
 
-        :return: объект игры; роль игрока в ней; True, если игрок уже был записан и игра будет переоткрыта
+        :return: ORM объект игры, роль игрока, открывается ли игра повторно
         :raise NoGameFound: если игры с данным ID не существует
         :raise NoEmptySeats: если все места для игроков заняты
         :raise UnfinishedGame: если юзер все еще участвует как игрок в другой игре
@@ -209,3 +209,28 @@ class GameService:
         spectator_enums = [PlayerRoleEnum.spectator]
         spectators = [player for player in game.players if player.role in spectator_enums]
         return len(spectators) < config.MAX_SPECTATORS_NUM
+
+    async def set_player_ready(self, player: User, game_id: uuid.UUID) -> tuple[Game, str, PlayerRoleEnum]:
+        """
+        Отметка готовности игрока
+
+        :return: ORM объект игры, имя игрока, роль игрока
+        :raise NoGameFound: если игры с данным ID не существует
+        :raise NotInGame: если данный юзер не записан в игру
+        :raise UnsuitableGameState: если игра уже начата или завершена
+        :raise NotAPlayer: если юзер - не игрок
+        """
+        if (game := await self.get_game(game_id)) is None:
+            raise exceptions.NoGameFound()
+        if not await self.__check_user_in_game(user=player, game=game):
+            raise exceptions.NotInGame()
+        if game.state != GameStateEnum.created:
+            raise exceptions.UnsuitableGameState()
+        if (role := await self.__get_role_by_player(game, player)) == PlayerRoleEnum.spectator:
+            raise exceptions.NotAPlayer()
+        pr = await self.__get_player_by_role(game, role)
+        pr.ready = True
+        name, role = pr.player.name, pr.role
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game, name, role

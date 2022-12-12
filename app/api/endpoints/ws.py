@@ -115,6 +115,33 @@ class RenjuWSEndpoint(WebSocketActions):
             )
             raise e     # log
 
+    async def ready(self, connection: WSConnection, data: Any) -> None:
+        try:
+            game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
+            async with async_session_context() as db:
+                user = await UserService(db).get_user_by_id(connection.user_id)
+                game, name, role = await GameService(db).set_player_ready(player=user, game_id=game_input_data.id)
+                if not game:
+                    return
+                game_data = GameSchemaOut.from_orm(game)
+                await self.manager.limited_broadcast(
+                    user_ids=[pr.player.id for pr in game.players],
+                    message=message.PlayerReadyMessage(
+                        game=game_data,
+                        player_name=name,
+                        player_role=role,
+                    ),
+                )
+                # --- попытка стартануть игру. Ничего не делать, если не все игроки Ready
+        except (exceptions.UnsuitableGameState, exceptions.NotAPlayer):
+            pass
+        except (ValidationError, ValueError, exceptions.NoGameFound, exceptions.NotInGame) as e:
+            # уведомляем об ошибке, выписываем игрока из игры без простановки поражения
+            raise e
+        except Exception as e:
+            # log
+            raise e
+
 
 @router.websocket('/renju/ws')
 async def renju(websocket: WebSocket, user: User = Depends(get_current_user)):

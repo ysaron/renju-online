@@ -304,6 +304,8 @@ div.icon-wrapper {
 }
 .player-active {
     background-color: var(--green);
+    color: white;
+    cursor: pointer;
 }
 .player-none {
     pointer-events: none;

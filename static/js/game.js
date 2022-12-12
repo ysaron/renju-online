@@ -34,6 +34,11 @@ function playerJoined(game, playerName) {
     renderPlayers(game);
 }
 
+function playerReady(game, playerName, playerRole) {
+    console.log(`${playerName} ready!`);
+    renderPlayers(game);
+}
+
 function spectatorJoined(game) {
 }
 
@@ -62,8 +67,8 @@ function buildBoard(board) {
     }
     cellsArr.reverse();
 
-    boardBlock.style.gridTemplateColumns = `repeat(${board.length}, 1fr)`;
-    boardBlock.style.gridTemplateRows = `repeat(${board.length}, 1fr)`;
+    boardBlock.style.gridTemplateColumns = `repeat(${board.length}, minmax(0, 1fr))`;
+    boardBlock.style.gridTemplateRows = `repeat(${board.length}, minmax(0, 1fr))`;
 
     for (let row of cellsArr) {
         for (let cell of row) {
@@ -72,8 +77,8 @@ function buildBoard(board) {
     }
 
     // Axes
-    xAxis.style.gridTemplateColumns = `repeat(${board[0].length}, 1fr)`;
-    yAxis.style.gridTemplateRows = `repeat(${board.length}, 1fr)`;
+    xAxis.style.gridTemplateColumns = `repeat(${board[0].length}, minmax(0, 1fr))`;
+    yAxis.style.gridTemplateRows = `repeat(${board.length}, minmax(0, 1fr))`;
     for (let y = board.length; y >= 1; y--) {
         let axisCell = document.createElement("div");
         axisCell.classList.add("axis-cell");
@@ -108,9 +113,18 @@ function showPlayersSection(game) {
 }
 
 function renderPlayers(game) {
-    if (game.player_1) addPlayerInBlock("white", game.player_1.player.name);
-    if (game.player_2) addPlayerInBlock("black", game.player_2.player.name);
-    if (game.player_3) addPlayerInBlock("gray", game.player_3.player.name);
+    if (game.player_1) {
+        addPlayerInBlock("white", game.player_1.player.name);
+        if (game.player_1.ready) setPlayerReady("white");
+    }
+    if (game.player_2) {
+        addPlayerInBlock("black", game.player_2.player.name);
+        if (game.player_2.ready) setPlayerReady("black");
+    }
+    if (game.player_3) {
+        addPlayerInBlock("gray", game.player_3.player.name);
+        if (game.player_3.ready) setPlayerReady("gray");
+    }
 }
 
 function addPlayerInBlock(color, playerName) {
@@ -120,10 +134,26 @@ function addPlayerInBlock(color, playerName) {
     playerBlockName.innerHTML = playerName;
 }
 
+function setPlayerReady(color) {
+    // color: white | black | gray
+    let playerBlock = gamePlayersSection.querySelector(`#player-${color}`);
+    let playerBlockReady = playerBlock.querySelector(".player-ready");
+    playerBlockReady.innerHTML = "&#10004;";
+    playerBlock.classList.remove("player-none");
+    playerBlock.classList.add("player-active");
+}
+
 function renderControls(game, my_role) {
     if (my_role == "4") {
         gameParticipateMode.style.display = "block";
     } else {
         btnReady.style.display = "block";
+        btnReady.dataset.gameid = game.id;
+        btnReady.addEventListener("click", sendReadyAction);
     }
+}
+
+function sendReadyAction(event) {
+    send({action: "ready", game_id: event.target.dataset.gameid});
+    event.target.disabled = true;
 }

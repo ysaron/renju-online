@@ -35,6 +35,13 @@ class SpectatorJoinedMessage(BaseMessageSchema):
     game: GameSchemaOut
 
 
+class PlayerReadyMessage(BaseMessageSchema):
+    action: str = 'ready'
+    game: GameSchemaOut
+    player_name: str
+    player_role: PlayerRoleEnum
+
+
 class ErrorMessage(BaseMessageSchema):
     action: str = 'error'
     detail: str

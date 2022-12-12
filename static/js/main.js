@@ -258,6 +258,9 @@ function wsDispatcher() {
             case "spectator_joined_list":
                 // отражаем изменения на экране списка игр (инкремент счетчика зрителей)
                 break;
+            case "ready":
+                playerReady(data.game, data.player_name, data.player_role);
+                break;
             case "error":
                 alert(data.detail);
                 break;

@@ -52,3 +52,15 @@ class UnfinishedGame(Exception):
 
 class NoGameFound(Exception):
     pass
+
+
+class NotInGame(Exception):
+    pass
+
+
+class UnsuitableGameState(Exception):
+    pass
+
+
+class NotAPlayer(Exception):
+    pass
