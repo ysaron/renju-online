@@ -126,6 +126,18 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     padding-left: 5px;
     color: var(--green);
 }
+#active-game-marker {
+    display: none;
+    color: var(--red);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    padding: 0 5px;
+    position: absolute;
+    height: 20px;
+    line-height: 20px;
+    top: -32px;
+    left: 25%;
+}
 
 .screen {
     display: none;
@@ -301,6 +313,11 @@ div.icon-wrapper {
     text-align: center;
     line-height: 50px;
     flex-basis: 60%;
+}
+.player-confirmed {
+    background-color: white;
+    color: var(--dark);
+    cursor: pointer;
 }
 .player-active {
     background-color: var(--green);
@@ -497,6 +514,7 @@ div.icon-wrapper {
     display: none;
 }
 .btn-blocked {
+    background-color: tomato;
 }
 
 .mode-block {

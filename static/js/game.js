@@ -19,7 +19,11 @@ function openGame(game, my_role) {
     screenGame.style.display = "flex";
 
     if (!currentBoards[game.id]) {
-        currentBoards[game.id] = board;
+        currentBoards[game.id] = {
+            boardArr: game.board,
+            allow_moves: false,
+            role: my_role
+        };
     }
     buildBoard(game.board);
 
@@ -116,14 +120,17 @@ function renderPlayers(game) {
     if (game.player_1) {
         addPlayerInBlock("white", game.player_1.player.name);
         if (game.player_1.ready) setPlayerReady("white");
+        if (game.player_1.can_move) setPlayerCanMove("white");
     }
     if (game.player_2) {
         addPlayerInBlock("black", game.player_2.player.name);
         if (game.player_2.ready) setPlayerReady("black");
+        if (game.player_2.can_move) setPlayerCanMove("black");
     }
     if (game.player_3) {
         addPlayerInBlock("gray", game.player_3.player.name);
         if (game.player_3.ready) setPlayerReady("gray");
+        if (game.player_3.can_move) setPlayerCanMove("gray");
     }
 }
 
@@ -140,6 +147,13 @@ function setPlayerReady(color) {
     let playerBlockReady = playerBlock.querySelector(".player-ready");
     playerBlockReady.innerHTML = "&#10004;";
     playerBlock.classList.remove("player-none");
+    playerBlock.classList.add("player-confirmed");
+}
+
+function setPlayerCanMove(color) {
+    // color: white | black | gray
+    let playerBlock = gamePlayersSection.querySelector(`#player-${color}`);
+    playerBlock.classList.remove("player-none", "player-confirmed");
     playerBlock.classList.add("player-active");
 }
 
@@ -155,5 +169,35 @@ function renderControls(game, my_role) {
 
 function sendReadyAction(event) {
     send({action: "ready", game_id: event.target.dataset.gameid});
-    event.target.disabled = true;
+    blockButton(event.target);
+}
+
+function showActiveGameMarker(role) {
+    activeGameMarker.innerHTML = "ACTIVE GAME";
+    if (role == "4") {
+        let svgEye = svgEyeTemp.content.firstElementChild.cloneNode(true);
+        activeGameMarker.innerHTML += " ";
+        activeGameMarker.appendChild(svgEye);
+    }
+    activeGameMarker.style.display = "block";
+}
+
+function hideActiveGameMarker() {
+    activeGameMarker.style.display = "none";
+}
+
+function gameStarted(game) {
+    showActiveGameMarker(currentBoards[game.id].role);
+    renderPlayers(game);
+    console.log("Game started");
+    console.log(game);
+}
+
+function unblockBoard(game) {
+    currentBoards[game.id].allow_moves = true;
+    console.log("YOUR TURN!");
+}
+
+function blockBoard(game) {
+    currentBoards[game.id].allow_moves = false;
 }

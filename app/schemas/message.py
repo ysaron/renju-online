@@ -42,6 +42,21 @@ class PlayerReadyMessage(BaseMessageSchema):
     player_role: PlayerRoleEnum
 
 
+class GameStartedMessage(BaseMessageSchema):
+    action: str = 'game_started'
+    game: GameSchemaOut
+
+
+class GameStartedListMessage(BaseMessageSchema):
+    action: str = 'game_started_list'
+    game: GameSchemaOut
+
+
+class UnblockBoardMessage(BaseMessageSchema):
+    action: str = 'unblock_board'
+    game: GameSchemaOut
+
+
 class ErrorMessage(BaseMessageSchema):
     action: str = 'error'
     detail: str

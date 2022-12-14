@@ -62,30 +62,18 @@ function fillGameList(games) {
     for (let game of games) {addGameInList(game)}
 }
 
-function addGameInList(game) {
-    let gameItem = document.createElement("div");
-    gameItem.dataset.id = game.id;
-    gameItem.classList.add("game-item");
-
+function createGameBlock(game, gameItem) {
+    gameItem.innerHTML = "";
     // --- Info ---------------------------------------------------
     let gameInfo = document.createElement("div");
     // Creator
     let creator = document.createElement("div");
-    creator.innerHTML = "by ";
-    let creatorName = document.createElement("span");
+    creator.innerHTML = "by";
+    let creatorName = document.createElement("div");
     creatorName.innerHTML = game.player_1.player.name;
     creatorName.classList.add("highlight", "green");
     creator.appendChild(creatorName);
     gameInfo.appendChild(creator);
-    // Datetime
-    let createdAt = document.createElement("div");
-    createdAt.innerHTML = "at ";
-    let createdAtDate = document.createElement("span");
-    let date = new Date(game.created_at);
-    createdAtDate.innerHTML = date.toLocaleString("ru-RU", {dateStyle: "short", timeStyle: "short"});
-    createdAtDate.classList.add("highlight", "datetime");
-    createdAt.appendChild(createdAtDate);
-    gameInfo.appendChild(createdAt);
 
     gameItem.appendChild(gameInfo);
 
@@ -105,16 +93,26 @@ function addGameInList(game) {
 
     // --- State ---------------------------------------------------------------------------------
     let gameState = document.createElement("div");
-    // Header
-    let gameStateHeader = document.createElement("div");
-    gameStateHeader.innerHTML = "State";
-    gameState.appendChild(gameStateHeader);
     // Value
     let gameStateValue = document.createElement("div");
     let stateColor = getGameStateColor(game.state);
     gameStateValue.classList.add("highlight", stateColor);
-    gameStateValue.innerHTML = game.state;
+    gameStateValue.innerHTML = game.state == "pending" ? "started" : game.state;
     gameState.appendChild(gameStateValue);
+    // Datetime
+    let dateBlock = document.createElement("div");
+    dateBlock.innerHTML = "at ";
+    let dateValue = document.createElement("span");
+    let dateStateMapping = {
+        created: game.created_at,
+        pending: game.started_at,
+        finished: game.finished_at
+    }
+    let dateJS = new Date(dateStateMapping[game.state]);
+    dateValue.innerHTML = dateJS.toLocaleString("ru-RU", {dateStyle: "short", timeStyle: "short"});
+    dateValue.classList.add("highlight", "datetime");
+    dateBlock.appendChild(dateValue);
+    gameState.appendChild(dateBlock);
 
     gameItem.appendChild(gameState);
 
@@ -150,10 +148,18 @@ function addGameInList(game) {
     let spectateBtn = spectateBtnTemp.content.firstElementChild.cloneNode(true);
     joinBtn.addEventListener("click", joinGameFromParent);
     spectateBtn.addEventListener("click", spectateGameFromParent);
+    if (game.state != "created") blockButton(joinBtn);
+    if (game.state == "finished") blockButton(spectateBtn);
     gameItem.appendChild(joinBtn);
     gameItem.appendChild(spectateBtn);
+    return gameItem
+}
 
-    // -----------------------------------------------------------------------------------------
+function addGameInList(game) {
+    let gameItem = document.createElement("div");
+    gameItem.dataset.id = game.id;
+    gameItem.classList.add("game-item");
+    gameItem = createGameBlock(game, gameItem);
     gameList.insertBefore(gameItem, gameList.firstChild);
 }
 
@@ -209,4 +215,9 @@ function playerJoinedList(game, playerName) {
     let gameItem = getGameItem(game.id);
     let indicatorBlock = gameItem.querySelector(".player-indicators");
     lightUpPlayerIndicators(game, indicatorBlock);
+}
+
+function gameStartedList(game) {
+    let gameItem = getGameItem(game.id);
+    gameItem = createGameBlock(game, gameItem);
 }

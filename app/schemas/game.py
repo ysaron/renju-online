@@ -47,6 +47,7 @@ class GameModeInGameSchema(GameModeBaseSchema):
 class PlayerSchema(BaseModel):
     player: UserRead
     ready: bool = False
+    can_move: bool = False
 
     class Config:
         orm_mode = True
@@ -89,12 +90,16 @@ class GameSchema(GameCreateSchema):
     state: GameStateEnum
     players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
     num_players: int = Field(2, ge=2, le=3, description='Кол-во игроков')
-    created_at: datetime
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
     with_myself: bool = Field(..., description='Игра с самим собой')
     board: list[list[int]]
+    created_at: datetime
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    result: ResultSchema | None = None
+    moves: list[MoveSchema]
 
     def get_player_by_role(self, role: PlayerRoleEnum) -> PlayerSchema | None:
         for player in self.players:
@@ -123,6 +128,13 @@ class GameSchemaOut(GameSchema):
         schema.spectators = instance.get_spectators()
         schema.players = None
         return schema
+
+    def current_player(self) -> PlayerSchema | None:
+        for player in [self.player_1, self.player_2, self.player_3]:
+            if not player:
+                continue
+            if player.can_move:
+                return player
 
 
 class GameFullSchema(GameSchema):

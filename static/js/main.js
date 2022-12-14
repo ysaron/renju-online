@@ -7,6 +7,7 @@ const screenMainLogged = document.getElementById("mainscreen-logged")
 const screenGameCreation = document.getElementById("game-creation")
 const screenGameList = document.getElementById("game-list-screen")
 const screenGame = document.getElementById("game-screen")
+const activeGameMarker = document.getElementById("active-game-marker")
 
 const modalSignup = document.getElementById("modal-signup")
 const modalLogin = document.getElementById("modal-login")
@@ -261,6 +262,15 @@ function wsDispatcher() {
             case "ready":
                 playerReady(data.game, data.player_name, data.player_role);
                 break;
+            case "game_started":
+                gameStarted(data.game);
+                break;
+            case "game_started_list":
+                gameStartedList(data.game);
+                break;
+            case "unblock_board":
+                unblockBoard(data.game);
+                break;
             case "error":
                 alert(data.detail);
                 break;
@@ -315,4 +325,14 @@ function updateTotalOnline(number) {
 
 function hideTotalOnline() {
     onlineCounterBlock.style.display = "none";
+}
+
+function blockButton(btn) {
+    btn.disabled = true;
+    btn.classList.add("btn-blocked");
+}
+
+function unblockButton(btn) {
+    btn.disabled = false;
+    btn.classList.remove("btn-blocked");
 }

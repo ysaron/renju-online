@@ -132,7 +132,27 @@ class RenjuWSEndpoint(WebSocketActions):
                         player_role=role,
                     ),
                 )
-                # --- попытка стартануть игру. Ничего не делать, если не все игроки Ready
+                # --- попытка начать игру
+                game = await GameService(db).attempt_to_start_game(game)
+                if not game:
+                    return
+
+                game_data = GameSchemaOut.from_orm(game)
+                current_player = game_data.current_player()
+                if not current_player:
+                    raise ValueError('Cannot determine current player')
+                # для игроков и зрителей: игра началась - отразить на экране игры
+                await self.manager.limited_broadcast(
+                    user_ids=[pr.player.id for pr in game.players],
+                    message=message.GameStartedMessage(game=game_data),
+                )
+                # для всех: игра началась - отразить в GameList
+                await self.manager.broadcast(message=message.GameStartedListMessage(game=game_data))
+                # для текущего игрока: разблокировать доску
+                await self.manager.send_message(
+                    websocket=self.manager.active_connections.get_websocket(user_id=current_player.player.id),
+                    message=message.UnblockBoardMessage(game=game_data),
+                )
         except (exceptions.UnsuitableGameState, exceptions.NotAPlayer):
             pass
         except (ValidationError, ValueError, exceptions.NoGameFound, exceptions.NotInGame) as e:

@@ -30,6 +30,7 @@ class PlayerRole(Base):
         default=PlayerRoleEnum.first.value,
     )
     ready = Column(Boolean, default=False)
+    can_move = Column(Boolean, default=False)
     result = Column(Enum(GameResultEnum))
 
     game = relationship('Game', back_populates='players', lazy='selectin')

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Literal
 
 from sqlalchemy import select, and_
@@ -50,14 +51,14 @@ class GameService:
         if not modes:
             return GameRules()
         chosen_modes = await self.get_modes(mode_ids=[m.id for m in modes])
-        return self.define_rules(chosen_modes)
+        return self.determine_rules(chosen_modes)
 
     async def create_game(self, creator: User, game_data: GameCreateSchema) -> Game:
         if await self.__check_user_active_games(creator):
             raise exceptions.UnfinishedGame()
 
         chosen_modes = await self.get_modes(mode_ids=[m.id for m in game_data.modes])
-        rules = self.define_rules(chosen_modes)
+        rules = self.determine_rules(chosen_modes)
 
         game = Game()
         game.is_private = game_data.is_private
@@ -83,7 +84,7 @@ class GameService:
         return game
 
     @staticmethod
-    def define_rules(modes: list[GameMode]) -> GameRules:
+    def determine_rules(modes: list[GameMode]) -> GameRules:
         """ Определяет правила игры на основе комбинации модификаций """
         rules = GameRules()
         if not modes:
@@ -132,7 +133,7 @@ class GameService:
             case _:
                 return [pr.game for pr in user.games]
 
-    async def get_game(self, game_id: uuid.UUID) -> Game:
+    async def get_game(self, game_id: uuid.UUID) -> Game | None:
         stmt = select(Game).where(Game.id == game_id)
         game = await self.__db.scalars(stmt)
         return game.one_or_none()
@@ -159,6 +160,25 @@ class GameService:
         return game, role, False
 
     @staticmethod
+    async def __get_player_role_enums(game: Game) -> tuple[PlayerRoleEnum, ...]:
+        """ Список ролей (енумов) игроков для данной игры """
+        player_enums = [PlayerRoleEnum.first, PlayerRoleEnum.second]
+        if game.num_players == 3:
+            player_enums.append(PlayerRoleEnum.third)
+        return tuple(player_enums)
+
+    async def __get_players(self, game: Game) -> list[PlayerRole]:
+        """ Список юзеров, записанных в игру в качестве игрока """
+        pr_enums = await self.__get_player_role_enums(game)
+        return [player for player in game.players if player.role in pr_enums]
+
+    @staticmethod
+    async def __get_spectators(game: Game) -> list[PlayerRole]:
+        """ Список юзеров, записанных в игру в качестве зрителя """
+        pr_enums = (PlayerRoleEnum.spectator,)
+        return [player for player in game.players if player.role in pr_enums]
+
+    @staticmethod
     async def __check_user_in_game(user: User, game: Game) -> bool:
         """ Возвращает True, если юзер записан в игру как игрок или зритель """
         return any([pr.player.id == user.id for pr in game.players])
@@ -183,13 +203,11 @@ class GameService:
 
         :return: роль, в которой игрок будет прикреплен к игре; None, если свободных мест нет
         """
-        player_enums = [PlayerRoleEnum.first, PlayerRoleEnum.second]
-        if game.num_players == 3:
-            player_enums.append(PlayerRoleEnum.third)
-        for pl_enum in player_enums:
-            player = await self.__get_player_by_role(game, role=pl_enum)
+        pr_enums = await self.__get_player_role_enums(game)
+        for pr_enum in pr_enums:
+            player = await self.__get_player_by_role(game, role=pr_enum)
             if player is None:
-                return pl_enum
+                return pr_enum
 
     @staticmethod
     async def __get_player_by_role(game: Game, role: PlayerRoleEnum) -> PlayerRole | None:
@@ -203,12 +221,15 @@ class GameService:
             if pr.player.id == player.id:
                 return pr.role
 
-    @staticmethod
-    def __check_spectator_seats(game: Game) -> bool:
+    async def __check_spectator_seats(self, game: Game) -> bool:
         """ Возвращает True, если у игры есть свободное место для зрителя """
-        spectator_enums = [PlayerRoleEnum.spectator]
-        spectators = [player for player in game.players if player.role in spectator_enums]
+        spectators = await self.__get_spectators(game)
         return len(spectators) < config.MAX_SPECTATORS_NUM
+
+    async def __check_players_ready(self, game: Game) -> bool:
+        """ Возвращает True если все игроки подтвердили готовность """
+        players = await self.__get_players(game)
+        return all(pr.ready for pr in players)
 
     async def set_player_ready(self, player: User, game_id: uuid.UUID) -> tuple[Game, str, PlayerRoleEnum]:
         """
@@ -234,3 +255,45 @@ class GameService:
         await self.__db.commit()
         await self.__db.refresh(game)
         return game, name, role
+
+    async def get_role_ready_to_move(self, game: Game) -> PlayerRoleEnum | None:
+        players = await self.__get_players(game)
+        for pr in players:
+            if pr.can_move:
+                return pr.role
+
+    async def get_role_next_to_move(self, game: Game) -> PlayerRoleEnum:
+        pr_enums = await self.__get_player_role_enums(game)
+        role_ready_to_move = await self.get_role_ready_to_move(game)
+        if not role_ready_to_move:
+            return pr_enums[0]
+        try:
+            return pr_enums[pr_enums.index(role_ready_to_move) + 1]
+        except IndexError:
+            return pr_enums[0]
+        except ValueError:      # index() не нашел элемент
+            raise
+
+    async def switch_turn_order(self, game: Game) -> Game:
+        role_next_to_move = await self.get_role_next_to_move(game)
+        current_player = await self.__get_player_by_role(game, role=role_next_to_move)
+        current_player.can_move = True
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game
+
+    async def start_game(self, game: Game) -> Game:
+        """ Определяет очередность ходов, запускает игру """
+        game = await self.switch_turn_order(game)
+        game.state = GameStateEnum.pending
+        game.started_at = datetime.now()
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game
+
+    async def attempt_to_start_game(self, game: Game) -> Game | None:
+        if all([
+            await self.__get_empty_seat(game) is None,      # свободных мест нет, все заняты
+            await self.__check_players_ready(game),         # READY=True у всех игроков
+        ]):
+            return await self.start_game(game)
