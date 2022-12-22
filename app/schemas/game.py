@@ -5,7 +5,7 @@ from typing import Type, Any
 from pydantic import BaseModel, Field
 
 from .user import UserRead
-from app.enums.game import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
+from app.enums.game import PlayerRoleEnum, GameStateEnum, PlayerResultEnum, PlayerResultReasonEnum
 
 
 class GameModeBaseSchema(BaseModel):
@@ -44,23 +44,20 @@ class GameModeInGameSchema(GameModeBaseSchema):
     id: int
 
 
-class PlayerSchema(BaseModel):
-    player: UserRead
-    ready: bool = False
-    can_move: bool = False
+class ResultSchema(BaseModel):
+    result: PlayerResultEnum | None = None
+    reason: PlayerResultReasonEnum | None = None
 
     class Config:
         orm_mode = True
 
 
-class PlayerRoleSchema(PlayerSchema):
-    role: PlayerRoleEnum
-
-
-class ResultSchema(BaseModel):
-    result: GameResultEnum
-    cause: GameResultCauseEnum
-    winner: UserRead
+class PlayerSchema(BaseModel):
+    player: UserRead
+    ready: bool = False
+    can_move: bool = False
+    role: PlayerRoleEnum | None = None
+    result: ResultSchema
 
     class Config:
         orm_mode = True
@@ -88,7 +85,7 @@ class GameCreateSchema(GameBaseSchema):
 class GameSchema(GameCreateSchema):
     id: uuid.UUID
     state: GameStateEnum
-    players: list[PlayerRoleSchema] = Field(..., max_items=3, description='Игроки (до 3)')
+    players: list[PlayerSchema] = Field(..., max_items=3, description='Игроки (до 3)')
     num_players: int = Field(2, ge=2, le=3, description='Кол-во игроков')
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
@@ -98,7 +95,6 @@ class GameSchema(GameCreateSchema):
     created_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
-    result: ResultSchema | None = None
     moves: list[MoveSchema]
 
     def get_player_by_role(self, role: PlayerRoleEnum) -> PlayerSchema | None:
@@ -140,7 +136,6 @@ class GameSchemaOut(GameSchema):
 class GameFullSchema(GameSchema):
     started_at: datetime | None = None
     finished_at: datetime | None = None
-    result: ResultSchema | None = None
     moves: list[MoveSchema]
 
 

@@ -9,6 +9,7 @@ const gameIdBlock = document.getElementById("game-id-block")
 const readyBlock = document.getElementById("ready-block")
 const gameParticipateMode = document.getElementById("game-participate-mode")
 const btnReady = document.getElementById("btn-ready")
+const btnLeave = document.getElementById("btn-leave")
 
 let currentBoards = {};
 
@@ -40,6 +41,7 @@ function playerJoined(game, playerName) {
 
 function playerReady(game, playerName, playerRole) {
     console.log(`${playerName} ready!`);
+    btnLeave.innerHTML = "Concede";
     renderPlayers(game);
 }
 
@@ -54,6 +56,7 @@ function spectatorLeft(game) {
 }
 
 function buildBoard(board) {
+    console.log(currentBoards);
     // board: 2D Array 15х15 or 30х30
     clearBoard();
     let cellsArr = [];
@@ -117,6 +120,7 @@ function showPlayersSection(game) {
 }
 
 function renderPlayers(game) {
+    clearPlayersSection();
     if (game.player_1) {
         addPlayerInBlock("white", game.player_1.player.name);
         if (game.player_1.ready) setPlayerReady("white");
@@ -131,6 +135,17 @@ function renderPlayers(game) {
         addPlayerInBlock("gray", game.player_3.player.name);
         if (game.player_3.ready) setPlayerReady("gray");
         if (game.player_3.can_move) setPlayerCanMove("gray");
+    }
+}
+
+function clearPlayersSection() {
+    for (block of gamePlayersSection.children) {
+        block.className = "";
+        block.classList.add("player", "player-none");
+        let playerBlockName = block.querySelector(".player-name");
+        playerBlockName.innerHTML = "Unknown";
+        let playerBlockReady = block.querySelector(".player-ready");
+        playerBlockReady.innerHTML = "";
     }
 }
 
@@ -157,7 +172,20 @@ function setPlayerCanMove(color) {
     playerBlock.classList.add("player-active");
 }
 
+function setPlayerLose(color) {
+    // color: white | black | gray
+    let playerBlock = gamePlayersSection.querySelector(`#player-${color}`);
+    let playerBlockReady = playerBlock.querySelector(".player-ready");
+    playerBlockReady.innerHTML = "&#10008;";
+    playerBlock.classList.remove("player-confirmed");
+    playerBlock.classList.add("player-lost");
+}
+
 function renderControls(game, my_role) {
+    btnLeave.innerHTML = "Leave";
+    btnLeave.addEventListener("click", leaveGame);
+    btnLeave.dataset.gameid = game.id;
+    unblockButton(btnReady);
     if (my_role == "4") {
         gameParticipateMode.style.display = "block";
     } else {
@@ -183,6 +211,7 @@ function showActiveGameMarker(role) {
 }
 
 function hideActiveGameMarker() {
+    activeGameMarker.innerHTML = "";
     activeGameMarker.style.display = "none";
 }
 
@@ -200,4 +229,31 @@ function unblockBoard(game) {
 
 function blockBoard(game) {
     currentBoards[game.id].allow_moves = false;
+}
+
+function gameRemoved(game_id) {
+    alert("This game has been removed.");
+    showMainScreen();
+}
+
+function updateGame(game) {
+    console.log("The game has been updated. Re-render players...");
+    renderPlayers(game);
+}
+
+function leaveGame(event) {
+    send({action: "leave", game_id: event.target.dataset.gameid});
+}
+
+function leftGame(game) {
+    delete currentBoards[game.id];
+    showMainScreen();
+}
+
+function gameFinished(game) {
+    hideActiveGameMarker();
+    renderPlayers(game);
+    alert(`The game has been finished. Result: ${game.result}`);
+    delete currentBoards[game.id];
+    showMainScreen();
 }

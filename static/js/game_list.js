@@ -70,7 +70,11 @@ function createGameBlock(game, gameItem) {
     let creator = document.createElement("div");
     creator.innerHTML = "by";
     let creatorName = document.createElement("div");
-    creatorName.innerHTML = game.player_1.player.name;
+    if (game.player_1) {
+        creatorName.innerHTML = game.player_1.player.name;
+    } else {
+        creatorName.innerHTML = "unknown";
+    }
     creatorName.classList.add("highlight", "green");
     creator.appendChild(creatorName);
     gameInfo.appendChild(creator);
@@ -164,17 +168,23 @@ function addGameInList(game) {
 }
 
 function lightUpPlayerIndicators(game, indicatorBlock) {
+    for (indicator of indicatorBlock.children) {
+        indicator.classList.add("indicator-empty");
+    }
     if (game.player_1) {
         indicatorBlock.children[0].classList.remove("indicator-empty");
-        indicatorBlock.children[0].classList.add("indicator-green");
+        let cls = game.player_1.result.result == 2 ? "indicator-red" : "indicator-green";
+        indicatorBlock.children[0].classList.add(cls);
     }
     if (game.player_2) {
         indicatorBlock.children[1].classList.remove("indicator-empty");
-        indicatorBlock.children[1].classList.add("indicator-green");
+        let cls = game.player_2.result.result == 2 ? "indicator-red" : "indicator-green";
+        indicatorBlock.children[1].classList.add(cls);
     }
     if (game.player_3) {
         indicatorBlock.children[2].classList.remove("indicator-empty");
-        indicatorBlock.children[2].classList.add("indicator-green");
+        let cls = game.player_3.result.result == 2 ? "indicator-red" : "indicator-green";
+        indicatorBlock.children[2].classList.add(cls);
     }
 }
 
@@ -217,7 +227,13 @@ function playerJoinedList(game, playerName) {
     lightUpPlayerIndicators(game, indicatorBlock);
 }
 
-function gameStartedList(game) {
+function updateGameInList(game) {
     let gameItem = getGameItem(game.id);
     gameItem = createGameBlock(game, gameItem);
+}
+
+function gameRemovedList(game_id) {
+    let gameItem = getGameItem(game_id);
+    gameItem.style.display = "none";
+    delete currentBoards[game_id];
 }

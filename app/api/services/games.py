@@ -1,20 +1,31 @@
 import uuid
 from datetime import datetime
 from typing import Literal
+from dataclasses import dataclass
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import config
-from app.models.game import GameMode, Game, PlayerRole
+from app.models.game import GameMode, Game, PlayerRole, PlayerResult
 from app.models.user import User
 from app.schemas.game import (
     GameModeInGameSchema,
     GameCreateSchema,
     GameRules,
 )
-from app.enums.game import PlayerRoleEnum, GameStateEnum
+from app.enums.game import PlayerRoleEnum, GameStateEnum, PlayerResultEnum, PlayerResultReasonEnum
 from app.core import exceptions
+
+
+@dataclass(frozen=True)
+class GameMetaWrapper:
+    """ Обертка для передачи вместе с ORM-объектом Game доп. данных """
+    game: Game
+    current_role: PlayerRoleEnum | None = None
+    current_player_name: str | None = None
+    reopen: bool = False
+    delete: bool = False
 
 
 class Board(list[list[int]]):
@@ -53,7 +64,7 @@ class GameService:
         chosen_modes = await self.get_modes(mode_ids=[m.id for m in modes])
         return self.determine_rules(chosen_modes)
 
-    async def create_game(self, creator: User, game_data: GameCreateSchema) -> Game:
+    async def create_game(self, creator: User, game_data: GameCreateSchema) -> GameMetaWrapper:
         if await self.__check_user_active_games(creator):
             raise exceptions.UnfinishedGame()
 
@@ -73,6 +84,7 @@ class GameService:
 
         pr = PlayerRole(role=PlayerRoleEnum.first)
         pr.player = creator
+        pr.result = PlayerResult()
         game.players.append(pr)
 
         for m in chosen_modes:
@@ -81,7 +93,7 @@ class GameService:
         self.__db.add(game)
         await self.__db.commit()
         await self.__db.refresh(game)
-        return game
+        return GameMetaWrapper(game=game)
 
     @staticmethod
     def determine_rules(modes: list[GameMode]) -> GameRules:
@@ -127,7 +139,7 @@ class GameService:
             case 'nonstarted':
                 return [pr.game for pr in user.games if pr.game.state == GameStateEnum.created]
             case 'active':
-                return [pr.game for pr in user.games if pr.ready and pr.result is not None]
+                return [pr.game for pr in user.games if pr.ready and pr.result.result is None]
             case 'finished':
                 return [pr.game for pr in user.games if pr.game.state == GameStateEnum.finished]
             case _:
@@ -138,7 +150,7 @@ class GameService:
         game = await self.__db.scalars(stmt)
         return game.one_or_none()
 
-    async def join_game(self, player: User, game_id: uuid.UUID) -> tuple[Game, PlayerRoleEnum, bool]:
+    async def join_game(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
         """
         Присоединение нового игрока
 
@@ -150,14 +162,14 @@ class GameService:
         if (game := await self.get_game(game_id)) is None:
             raise exceptions.NoGameFound()
         if await self.__check_user_in_game(user=player, game=game):
-            role = await self.__get_role_by_player(game, player)
-            return game, role, True
+            pr = await self.__get_game_player_association(game, player)
+            return GameMetaWrapper(game=game, current_role=pr.role, reopen=True)
         if (role := await self.__get_empty_seat(game)) is None:
             raise exceptions.NoEmptySeats()
         if await self.__check_user_active_games(player):
             raise exceptions.UnfinishedGame()
         game = await self.__write_player_to_game(player=player, game=game, role=role)
-        return game, role, False
+        return GameMetaWrapper(game=game, current_role=role)
 
     @staticmethod
     async def __get_player_role_enums(game: Game) -> tuple[PlayerRoleEnum, ...]:
@@ -167,10 +179,19 @@ class GameService:
             player_enums.append(PlayerRoleEnum.third)
         return tuple(player_enums)
 
-    async def __get_players(self, game: Game) -> list[PlayerRole]:
-        """ Список юзеров, записанных в игру в качестве игрока """
+    async def __get_players(self, game: Game, only_active: bool = False) -> list[PlayerRole]:
+        """
+        Список юзеров, записанных в игру в качестве игрока
+
+        :param game: ORM объект игры
+        :param only_active: если True, вернутся только игроки, не завершившие игру
+        :return: список ассоциаций game-player
+        """
         pr_enums = await self.__get_player_role_enums(game)
-        return [player for player in game.players if player.role in pr_enums]
+        players = [player for player in game.players if player.role in pr_enums]
+        if only_active:
+            players = [player for player in players if player.result.result is None]
+        return players
 
     @staticmethod
     async def __get_spectators(game: Game) -> list[PlayerRole]:
@@ -185,7 +206,7 @@ class GameService:
 
     async def __write_player_to_game(self, player: User, game: Game, role: PlayerRoleEnum) -> Game:
         """ Записывает юзера в игру как игрока """
-        pr = PlayerRole(role=role, player=player)
+        pr = PlayerRole(role=role, player=player, result=PlayerResult())
         game.players.append(pr)
         await self.__db.commit()
         await self.__db.refresh(game)
@@ -194,7 +215,8 @@ class GameService:
     async def __check_user_active_games(self, user: User) -> bool:
         """ Возвращает True, если юзер имеет незаконченную игру """
         # Юзер не закончил игру, если ready уже нажато, но результат игры еще не записан
-        return bool(await self.get_user_games(user, scope='active'))
+        active_games = await self.get_user_games(user, scope='active')
+        return bool(active_games)
 
     async def __get_empty_seat(self, game: Game) -> PlayerRoleEnum | None:
         """
@@ -216,10 +238,10 @@ class GameService:
                 return pr
 
     @staticmethod
-    async def __get_role_by_player(game: Game, player: User) -> PlayerRoleEnum | None:
+    async def __get_game_player_association(game: Game, player: User) -> PlayerRole | None:
         for pr in game.players:
             if pr.player.id == player.id:
-                return pr.role
+                return pr
 
     async def __check_spectator_seats(self, game: Game) -> bool:
         """ Возвращает True, если у игры есть свободное место для зрителя """
@@ -231,7 +253,7 @@ class GameService:
         players = await self.__get_players(game)
         return all(pr.ready for pr in players)
 
-    async def set_player_ready(self, player: User, game_id: uuid.UUID) -> tuple[Game, str, PlayerRoleEnum]:
+    async def set_player_ready(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
         """
         Отметка готовности игрока
 
@@ -247,14 +269,14 @@ class GameService:
             raise exceptions.NotInGame()
         if game.state != GameStateEnum.created:
             raise exceptions.UnsuitableGameState()
-        if (role := await self.__get_role_by_player(game, player)) == PlayerRoleEnum.spectator:
+        pr = await self.__get_game_player_association(game, player)
+        if pr.role == PlayerRoleEnum.spectator:
             raise exceptions.NotAPlayer()
-        pr = await self.__get_player_by_role(game, role)
         pr.ready = True
         name, role = pr.player.name, pr.role
         await self.__db.commit()
         await self.__db.refresh(game)
-        return game, name, role
+        return GameMetaWrapper(game=game, current_player_name=name, current_role=role)
 
     async def get_role_ready_to_move(self, game: Game) -> PlayerRoleEnum | None:
         players = await self.__get_players(game)
@@ -297,3 +319,79 @@ class GameService:
             await self.__check_players_ready(game),         # READY=True у всех игроков
         ]):
             return await self.start_game(game)
+
+    async def leave(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
+        if (game := await self.get_game(game_id)) is None:
+            raise exceptions.NoGameFound()
+        if not await self.__check_user_in_game(user=player, game=game):
+            raise exceptions.NotInGame()
+        pr = await self.__get_game_player_association(game, player)
+        pr_enums = await self.__get_player_role_enums(game)
+        if pr.role not in pr_enums:
+            raise exceptions.NotAPlayer()
+        if pr.ready:
+            return await self.__player_concede(pr, game)
+        else:
+            return await self.__player_leave(pr, game)
+
+    async def __remove_player(self, pr: PlayerRole, game: Game) -> Game:
+        await self.__db.delete(pr)
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game
+
+    async def remove_game(self, game: Game) -> None:
+        await self.__db.delete(game)
+        await self.__db.commit()
+
+    async def __player_leave(self, pr: PlayerRole, game: Game) -> GameMetaWrapper:
+        game = await self.__remove_player(pr, game)
+        if not await self.__get_players(game):
+            return GameMetaWrapper(game=game, delete=True)
+        return GameMetaWrapper(game=game)
+
+    async def __player_concede(self, pr: PlayerRole, game: Game) -> GameMetaWrapper:
+        players = await self.__get_players(game)
+        if len(players) == 1:
+            return GameMetaWrapper(game=game, delete=True)
+
+        game = await self.__set_player_result(
+            pr=pr,
+            game=game,
+            result=PlayerResultEnum.lose,
+            reason=PlayerResultReasonEnum.concede,
+        )
+        active_players = await self.__get_players(game, only_active=True)
+        num_active_players = len(active_players)
+        if num_active_players > 1:
+            return GameMetaWrapper(game=game)
+        if num_active_players == 1:
+            game = await self.__set_player_result(
+                pr=active_players[0],
+                game=game,
+                result=PlayerResultEnum.win,
+                reason=PlayerResultReasonEnum.tech,
+            )
+        return GameMetaWrapper(game=await self.finish_game(game))
+
+    async def __set_player_result(
+            self,
+            pr: PlayerRole,
+            game: Game,
+            result: PlayerResultEnum,
+            reason: PlayerResultReasonEnum,
+    ) -> Game:
+        pr.result.result = result
+        pr.result.reason = reason
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game
+
+    async def finish_game(self, game: Game) -> Game:
+        # - - - простановка непроставленных результатов? - - -
+
+        game.state = GameStateEnum.finished
+        game.finished_at = datetime.now()
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        return game

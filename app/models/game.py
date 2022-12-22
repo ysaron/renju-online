@@ -4,7 +4,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.dialects import postgresql as psql
 
 from app.core.db.session import Base
-from app.enums.game import PlayerRoleEnum, GameStateEnum, GameResultEnum, GameResultCauseEnum
+from app.enums.game import PlayerRoleEnum, GameStateEnum, PlayerResultEnum, PlayerResultReasonEnum
 from .mixins import UuidIdMixin
 
 
@@ -31,24 +31,35 @@ class PlayerRole(Base):
     )
     ready = Column(Boolean, default=False)
     can_move = Column(Boolean, default=False)
-    result = Column(Enum(GameResultEnum))
+
+    # One To One (PlayerResult)
+    result_id = Column(Integer, ForeignKey('playerresult.id', ondelete='CASCADE'))
+    result = relationship(
+        'PlayerResult',
+        back_populates='pr',
+        lazy='selectin',
+        cascade='save-update, merge, delete, delete-orphan',
+        single_parent=True,
+    )
 
     game = relationship('Game', back_populates='players', lazy='selectin')
     player = relationship('User', back_populates='games', lazy='selectin')
 
 
 class Game(UuidIdMixin, Base):
-    # m2m (User)
-    players = relationship('PlayerRole', back_populates='game', lazy='selectin')
+    # m2m Intermediate (User)
+    players = relationship(
+        'PlayerRole',
+        back_populates='game',
+        lazy='selectin',
+        cascade='save-update, merge, delete, delete-orphan',
+    )
 
     state = Column(Enum(GameStateEnum), nullable=False, default=GameStateEnum.created)
     created_at = Column(DateTime(timezone=True), default=func.now())
     started_at = Column(DateTime(timezone=True))
     finished_at = Column(DateTime(timezone=True))
     is_private = Column(Boolean, default=False)
-
-    # One To One (GameResult)
-    result = relationship('GameResult', back_populates='game', uselist=False, lazy='selectin')
 
     # m2m (GameMode)
     modes = relationship('GameMode', secondary=game_mode_m2m, back_populates='games', lazy='selectin')
@@ -65,18 +76,13 @@ class Game(UuidIdMixin, Base):
     board = Column(psql.ARRAY(Integer, dimensions=2))
 
 
-class GameResult(Base):
+class PlayerResult(Base):
     id = Column(Integer, primary_key=True)
-    # result = Column(Enum(GameResultEnum))
-    cause = Column(Enum(GameResultCauseEnum))
+    result = Column(Enum(PlayerResultEnum))
+    reason = Column(Enum(PlayerResultReasonEnum))
 
-    # One To One (Game)
-    game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
-    game = relationship('Game', back_populates='result', lazy='selectin')
-
-    # # Many to One (User)
-    # winner_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
-    # winner = relationship('User', back_populates='victories', lazy='selectin')
+    # One To One (PlayerRole)
+    pr = relationship('PlayerRole', back_populates='result', uselist=False, lazy='selectin')
 
 
 class GameMode(Base):

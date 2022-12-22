@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 from .game import GameSchemaOut
@@ -47,13 +49,38 @@ class GameStartedMessage(BaseMessageSchema):
     game: GameSchemaOut
 
 
-class GameStartedListMessage(BaseMessageSchema):
-    action: str = 'game_started_list'
+class UnblockBoardMessage(BaseMessageSchema):
+    action: str = 'unblock_board'
     game: GameSchemaOut
 
 
-class UnblockBoardMessage(BaseMessageSchema):
-    action: str = 'unblock_board'
+class GameRemovedListMessage(BaseMessageSchema):
+    action: str = 'game_removed_list'
+    game_id: UUID
+
+
+class GameRemovedMessage(BaseMessageSchema):
+    action: str = 'game_removed'
+    game_id: UUID
+
+
+class UpdateGameInListMessage(BaseMessageSchema):
+    action: str = 'update_game_list'
+    game: GameSchemaOut
+
+
+class UpdateGameMessage(BaseMessageSchema):
+    action: str = 'update_game'
+    game: GameSchemaOut
+
+
+class LeftGameMessage(BaseMessageSchema):
+    action: str = 'left_game'
+    game: GameSchemaOut
+
+
+class GameFinishedMessage(BaseMessageSchema):
+    action: str = 'game_finished'
     game: GameSchemaOut
 
 

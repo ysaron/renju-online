@@ -3,7 +3,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import relationship
 
 from app.core.db.session import Base
-from .game import PlayerRole, Move, GameResult
+from .game import PlayerRole, Move, PlayerResult
 from .mixins import UuidIdMixin
 
 

@@ -147,7 +147,7 @@
       </div>
       <div class="section">
         <button type="button" class="btn btn-large">Pass</button>
-        <button type="button" class="btn btn-large">Concede</button>
+        <button type="button" class="btn btn-large" id="btn-leave">Leave</button>
       </div>
     </div>
   </div>
@@ -255,37 +255,14 @@
   </div>
 </div>
 
-<div id="modal-top" class="modal">
-  <div class="modal-content modal-top">
-    <span class="close close-top">&times;</span>
-    <div class="wrapper-top-title">
-      <div class="column">Num</div>
-      <div class="column">User name</div>
-      <div class="column">Win</div>
-      <div class="column">Lose</div>
-      <div class="column">Draw</div>
-    </div>
-    <div class="wrapper-top">
-    </div>
-  </div>
-</div>
-
-
-<div id="modal-myStat" class="modal">
-  <div class="modal-content modal-myStat">
-    <span class="close close-myStat">&times;</span>
-    <div class="wrapper-myStat">
-      <div class="column">Num</div>
-      <div class="column">User name</div>
-      <div class="column">Win</div>
-      <div class="column">Lose</div>
-      <div class="column">Draw</div>
-      <div class="column"></div>
-      <div class="column column-username"></div>
-      <div class="column column-win"></div>
-      <div class="column column-lose"></div>
-      <div class="column column-draw"></div>
-    </div>
+<div id="modal-notification" class="modal">
+  <div class="modal-content">
+    <div class="notification-content"></div>
+    <button type="button" class="btn btn-icon btn-home">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+      </svg>
+    </button>
   </div>
 </div>
 

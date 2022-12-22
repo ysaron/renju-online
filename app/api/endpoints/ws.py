@@ -24,30 +24,30 @@ async_session_context = asynccontextmanager(get_async_session)
 
 class RenjuWSEndpoint(WebSocketActions):
     encoding = 'json'
-    actions = ['create_game', 'start_game', 'join_game', 'ready', 'move', 'example']
+    actions = ['create_game', 'join_game', 'ready', 'leave', 'move']
 
     async def create_game(self, connection: WSConnection, data: Any) -> None:
         try:
             # валидация данных и создание игры
-            game_data = GameCreateSchema(is_private=data.get('is_private', False), modes=data['modes'])
+            game_input_data = GameCreateSchema(is_private=data.get('is_private', False), modes=data['modes'])
             async with async_session_context() as db:
                 user = await UserService(db).get_user_by_id(connection.user_id)
-                game = await GameService(db).create_game(creator=user, game_data=game_data)
-                created_game_data = GameSchemaOut.from_orm(game)
+                game_meta = await GameService(db).create_game(creator=user, game_data=game_input_data)
+                game_schema = GameSchemaOut.from_orm(game_meta.game)
                 # открытие созданной игры
                 await self.manager.send_message(
                     websocket=connection.websocket,
                     message=message.OpenGameMessage(
-                        game=created_game_data,
+                        game=game_schema,
                         my_role=PlayerRoleEnum.first,
                     ),
                 )
                 # уведомление всех и вся о создании игры
                 if all([
-                    not created_game_data.is_private,
-                    not created_game_data.with_myself,
+                    not game_schema.is_private,
+                    not game_schema.with_myself,
                 ]):
-                    await self.manager.broadcast(message.GameAddedMessage(game=created_game_data))
+                    await self.manager.broadcast(message.GameAddedMessage(game=game_schema))
         except exceptions.UnfinishedGame:
             await self.manager.send_message(
                 websocket=connection.websocket,
@@ -64,34 +64,34 @@ class RenjuWSEndpoint(WebSocketActions):
             game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
             async with async_session_context() as db:
                 user = await UserService(db).get_user_by_id(connection.user_id)
-                game, role, reopen = await GameService(db).join_game(player=user, game_id=game_input_data.id)
-                game_data = GameSchemaOut.from_orm(game)
+                game_meta = await GameService(db).join_game(player=user, game_id=game_input_data.id)
+                game_schema = GameSchemaOut.from_orm(game_meta.game)
                 # открытие игры присоединившимся игроком
                 await self.manager.send_message(
                     websocket=connection.websocket,
                     message=message.OpenGameMessage(
-                        game=game_data,
-                        my_role=role,
+                        game=game_schema,
+                        my_role=game_meta.current_role,
                     ),
                 )
-                if reopen:
+                if game_meta.reopen:
                     # Игра открывается заново уже участвующим игроком, уведомлять всех не нужно
                     return
 
                 # limited broadcast для игроков и зрителей игры
                 await self.manager.limited_broadcast(
-                    user_ids=[pr.player.id for pr in game.players],
+                    user_ids=[pr.player.id for pr in game_meta.game.players],
                     message=message.PlayerJoinedMessage(
-                        game=game_data,
+                        game=game_schema,
                         player_name=user.name,
-                        player_role=role,
+                        player_role=game_meta.current_role,
                     ),
                 )
                 # уведомление всех и вся для обновления списка игр
                 await self.manager.broadcast(message.PlayerJoinedListMessage(
-                    game=game_data,
+                    game=game_schema,
                     player_name=user.name,
-                    player_role=role,
+                    player_role=game_meta.current_role,
                 ))
         except (ValidationError, ValueError, exceptions.NoGameFound):
             await self.manager.send_message(
@@ -120,38 +120,38 @@ class RenjuWSEndpoint(WebSocketActions):
             game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
             async with async_session_context() as db:
                 user = await UserService(db).get_user_by_id(connection.user_id)
-                game, name, role = await GameService(db).set_player_ready(player=user, game_id=game_input_data.id)
-                if not game:
+                game_meta = await GameService(db).set_player_ready(player=user, game_id=game_input_data.id)
+                if not game_meta.game:
                     return
-                game_data = GameSchemaOut.from_orm(game)
+                game_schema = GameSchemaOut.from_orm(game_meta.game)
                 await self.manager.limited_broadcast(
-                    user_ids=[pr.player.id for pr in game.players],
+                    user_ids=[pr.player.id for pr in game_meta.game.players],
                     message=message.PlayerReadyMessage(
-                        game=game_data,
-                        player_name=name,
-                        player_role=role,
+                        game=game_schema,
+                        player_name=game_meta.current_player_name,
+                        player_role=game_meta.current_role,
                     ),
                 )
                 # --- попытка начать игру
-                game = await GameService(db).attempt_to_start_game(game)
+                game = await GameService(db).attempt_to_start_game(game_meta.game)
                 if not game:
                     return
 
-                game_data = GameSchemaOut.from_orm(game)
-                current_player = game_data.current_player()
+                game_schema = GameSchemaOut.from_orm(game)
+                current_player = game_schema.current_player()
                 if not current_player:
                     raise ValueError('Cannot determine current player')
                 # для игроков и зрителей: игра началась - отразить на экране игры
                 await self.manager.limited_broadcast(
                     user_ids=[pr.player.id for pr in game.players],
-                    message=message.GameStartedMessage(game=game_data),
+                    message=message.GameStartedMessage(game=game_schema),
                 )
                 # для всех: игра началась - отразить в GameList
-                await self.manager.broadcast(message=message.GameStartedListMessage(game=game_data))
+                await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
                 # для текущего игрока: разблокировать доску
                 await self.manager.send_message(
                     websocket=self.manager.active_connections.get_websocket(user_id=current_player.player.id),
-                    message=message.UnblockBoardMessage(game=game_data),
+                    message=message.UnblockBoardMessage(game=game_schema),
                 )
         except (exceptions.UnsuitableGameState, exceptions.NotAPlayer):
             pass
@@ -160,6 +160,53 @@ class RenjuWSEndpoint(WebSocketActions):
             raise e
         except Exception as e:
             # log
+            raise e
+
+    async def leave(self, connection: WSConnection, data: Any) -> None:
+        try:
+            game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
+            async with async_session_context() as db:
+                user = await UserService(db).get_user_by_id(connection.user_id)
+                game_meta = await GameService(db).leave(player=user, game_id=game_input_data.id)
+                user_ids = [pr.player.id for pr in game_meta.game.players]
+
+                game_schema = GameSchemaOut.from_orm(game_meta.game)
+
+                # вернуть на главный экран вышедшего игрока
+                await self.manager.send_message(
+                    websocket=connection.websocket,
+                    message=message.LeftGameMessage(game=game_schema)
+                )
+
+                if game_meta.delete:
+                    await GameService(db).remove_game(game_meta.game)
+                    # удаляем игру из GameList - для всех
+                    await self.manager.broadcast(message.GameRemovedListMessage(game_id=game_input_data.id))
+                    # выкидываем в главное меню - для участников
+                    await self.manager.limited_broadcast(
+                        user_ids=user_ids,
+                        message=message.GameRemovedMessage(game_id=game_input_data.id),
+                    )
+                    return
+
+                # для всех: отразить изменения в GameList (красный либо пустой индикатор)
+                await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
+                # для участников: отразить изменения в playerBlock (красный либо пустой блок, зависит от результата)
+                await self.manager.limited_broadcast(
+                    user_ids=user_ids,
+                    message=message.UpdateGameMessage(game=game_schema),
+                )
+
+                if game_meta.game.state == GameStateEnum.finished:
+                    # отображаем результат участникам
+                    await self.manager.limited_broadcast(
+                        user_ids=user_ids,
+                        message=message.GameFinishedMessage(game=game_schema),
+                    )
+
+        except exceptions.NotAPlayer:
+            pass
+        except Exception as e:
             raise e
 
 

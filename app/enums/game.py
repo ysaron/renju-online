@@ -14,14 +14,17 @@ class GameStateEnum(enum.Enum):
     finished = 'finished'
 
 
-class GameResultEnum(enum.Enum):
+class PlayerResultEnum(enum.Enum):
     win = 1
-    draw = 2
+    lose = 2
+    draw = 3
 
 
-class GameResultCauseEnum(enum.Enum):
-    fair = 'honest victory'
-    timeout = 'timeout'
-    surrender = 'opponent surrendered'
-    no_cells = 'game board is over'
-    agreed_draw = 'players agreed to a draw'
+class PlayerResultReasonEnum(enum.Enum):
+    fair = 1
+    timeout = 2
+    concede = 3
+    disconnect = 4
+    full_board = 5
+    tech = 6
+    agreement = 7

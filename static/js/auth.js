@@ -14,8 +14,6 @@ btnRequestVerification.addEventListener("click", modalRequestVerificationOpen)
 btnForgotPassword.addEventListener("click", modalForgotPasswordOpen)
 btnLogout.addEventListener("click", logout)
 
-document.querySelector(".btn-top").addEventListener("click", modalTopOpen)
-document.querySelector(".close-top").addEventListener("click", modalTopClose)
 
 function modalSignupOpen() {
     modalSignup.style.display = "block"

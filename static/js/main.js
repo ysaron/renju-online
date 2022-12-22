@@ -15,6 +15,7 @@ const modalRequestVerification = document.getElementById("modal-request-verify")
 const modalForgotPassword = document.getElementById("modal-forgot-password")
 const modalResetPassword = document.getElementById("modal-reset-password")
 const modalVerify = document.getElementById("modal-verify")
+const modalNotification = document.getElementById("modal-notification")
 
 const btnLogout = document.querySelector(".logout")
 const spanUsername = document.querySelector(".span-username")
@@ -53,13 +54,12 @@ const spectatorRoles = ["4"];
 let ws;
 
 function showMainScreen() {
+    hideAllScreens();
     if (sessionStorage.getItem('token') && sessionStorage.getItem('username')) {
         let username = sessionStorage.getItem('username');
         showUsername(username);
-        hideAllScreens();
         screenMainLoggedShow();
     } else {
-        hideAllScreens();
         screenMainNotLoggedShow();
     }
 }
@@ -265,11 +265,26 @@ function wsDispatcher() {
             case "game_started":
                 gameStarted(data.game);
                 break;
-            case "game_started_list":
-                gameStartedList(data.game);
-                break;
             case "unblock_board":
                 unblockBoard(data.game);
+                break;
+            case "game_removed_list":
+                gameRemovedList(data.game_id);
+                break
+            case "game_removed":
+                gameRemoved(data.game_id);
+                break
+            case "update_game_list":
+                updateGameInList(data.game);
+                break;
+            case "update_game":
+                updateGame(data.game);
+                break;
+            case "left_game":
+                leftGame(data.game);
+                break;
+            case "game_finished":
+                gameFinished(data.game);
                 break;
             case "error":
                 alert(data.detail);
