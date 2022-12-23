@@ -68,6 +68,8 @@ function buildBoard(board) {
             cell.innerHTML = `${x}-${y}`;
             cell.dataset.x = x;
             cell.dataset.y = y;
+            cell.addEventListener("mouseover", highlightCell);
+            cell.addEventListener("mouseleave", cancelHighlightCell);
             cellsRow.push(cell);
         }
         cellsArr.push(cellsRow);
@@ -97,7 +99,7 @@ function buildBoard(board) {
         let axisCell = document.createElement("div");
         axisCell.classList.add("axis-cell");
         axisCell.innerHTML = x;
-        axisCell.dataset.y = x;
+        axisCell.dataset.x = x;
         xAxis.appendChild(axisCell);
     }
 }
@@ -139,7 +141,7 @@ function renderPlayers(game) {
 }
 
 function clearPlayersSection() {
-    for (block of gamePlayersSection.children) {
+    for (let block of gamePlayersSection.children) {
         block.className = "";
         block.classList.add("player", "player-none");
         let playerBlockName = block.querySelector(".player-name");
@@ -256,4 +258,32 @@ function gameFinished(game) {
     alert(`The game has been finished. Result: ${game.result}`);
     delete currentBoards[game.id];
     showMainScreen();
+}
+
+function getXAxisCell(cell) {
+    for (let aCell of xAxis.children) {
+        if (aCell.dataset.x == cell.dataset.x) return aCell
+    }
+}
+
+function getYAxisCell(cell) {
+    for (let aCell of yAxis.children) {
+        if (aCell.dataset.y == cell.dataset.y) return aCell
+    }
+}
+
+function highlightCell(event) {
+    event.target.classList.add("cell-highlight");
+    let xAxisCell = getXAxisCell(event.target);
+    let yAxisCell = getYAxisCell(event.target);
+    xAxisCell.classList.add("axis-cell-highlight");
+    yAxisCell.classList.add("axis-cell-highlight");
+}
+
+function cancelHighlightCell(event) {
+    event.target.classList.remove("cell-highlight");
+    let xAxisCell = getXAxisCell(event.target);
+    let yAxisCell = getYAxisCell(event.target);
+    xAxisCell.classList.remove("axis-cell-highlight");
+    yAxisCell.classList.remove("axis-cell-highlight");
 }
