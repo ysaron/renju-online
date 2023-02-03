@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from .game import GameSchemaOut
+from .game import GameSchemaOut, MoveSchema
 from app.enums.game import PlayerRoleEnum
 
 
@@ -72,6 +72,12 @@ class UpdateGameInListMessage(BaseMessageSchema):
 class UpdateGameMessage(BaseMessageSchema):
     action: str = 'update_game'
     game: GameSchemaOut
+
+
+class MoveMessage(BaseMessageSchema):
+    action: str = 'move'
+    game: GameSchemaOut
+    move: MoveSchema
 
 
 class LeftGameMessage(BaseMessageSchema):

@@ -266,19 +266,22 @@ function wsDispatcher() {
                 gameStarted(data.game);
                 break;
             case "unblock_board":
-                unblockBoard(data.game);
+                unblockBoard(data.game.id);
                 break;
             case "game_removed_list":
                 gameRemovedList(data.game_id);
-                break
+                break;
             case "game_removed":
                 gameRemoved(data.game_id);
-                break
+                break;
             case "update_game_list":
                 updateGameInList(data.game);
                 break;
             case "update_game":
                 updateGame(data.game);
+                break;
+            case "move":
+                renderMove(data.game, data.move);
                 break;
             case "left_game":
                 leftGame(data.game);
@@ -350,4 +353,9 @@ function blockButton(btn) {
 function unblockButton(btn) {
     btn.disabled = false;
     btn.classList.remove("btn-blocked");
+}
+
+function forgetGame(game_id) {
+    console.log("DELETE ", game_id);
+    delete currentBoards[game_id];
 }

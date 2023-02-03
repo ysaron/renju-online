@@ -89,8 +89,6 @@ class WebSocketActions(WebSocketEndpoint):
                 message = await connection.websocket.receive()
                 if message['type'] == 'websocket.receive':
                     data = await self.decode(connection.websocket, message)
-                    print(f'{data = }')
-                    print(f'{type(data) = }')
                     if data['action'] not in self.actions:
                         await self.action_not_allowed(connection, data)
                         continue
@@ -115,10 +113,8 @@ class WebSocketActions(WebSocketEndpoint):
         await self.update_total_online()
 
     async def on_receive(self, connection: WSConnection, data: Any) -> None:
-        # handler: Callable[[WSConnection, Any], Awaitable] = getattr(self, data['action'], self.action_not_allowed)
         handler: ConnDataAwaitable = getattr(self, data['action'], self.action_not_allowed)
         print(f'{data["action"] = }')
-        print(f'{handler.__name__ = }')
         return await handler(connection=connection, data=data)
 
     async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:

@@ -64,3 +64,11 @@ class UnsuitableGameState(Exception):
 
 class NotAPlayer(Exception):
     pass
+
+
+class CellOccupied(Exception):
+    pass
+
+
+class FalseClick(Exception):
+    pass

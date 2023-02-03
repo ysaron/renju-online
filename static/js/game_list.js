@@ -235,5 +235,7 @@ function updateGameInList(game) {
 function gameRemovedList(game_id) {
     let gameItem = getGameItem(game_id);
     gameItem.style.display = "none";
-    delete currentBoards[game_id];
+
+    console.log("FORGET GAME gameRemovedList");
+    forgetGame(game_id);
 }

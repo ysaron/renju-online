@@ -73,7 +73,7 @@ class Game(UuidIdMixin, Base):
     with_myself = Column(Boolean, default=False)
     num_players = Column(Integer, default=2)
 
-    board = Column(psql.ARRAY(Integer, dimensions=2))
+    board = Column(String)
 
 
 class PlayerResult(Base):
@@ -106,9 +106,14 @@ class Move(Base):
     game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
     game = relationship('Game', back_populates='moves', lazy='selectin')
 
-    # Many to One (User)
-    player_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
-    player = relationship('User', back_populates='moves', lazy='selectin')
+    # # Many to One (User)
+    # player_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
+    # player = relationship('User', back_populates='moves', lazy='selectin')
 
-    x_coord = Column(SmallInteger)
-    y_coord = Column(SmallInteger)
+    role = Column(
+        Enum(PlayerRoleEnum, values_callable=lambda obj: [e.value for e in obj]),
+        nullable=False,
+        default=PlayerRoleEnum.first.value,
+    )
+    x = Column(SmallInteger)
+    y = Column(SmallInteger)

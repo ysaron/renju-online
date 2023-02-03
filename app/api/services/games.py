@@ -7,12 +7,13 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import config
-from app.models.game import GameMode, Game, PlayerRole, PlayerResult
+from app.models.game import GameMode, Game, PlayerRole, PlayerResult, Move
 from app.models.user import User
 from app.schemas.game import (
     GameModeInGameSchema,
     GameCreateSchema,
     GameRules,
+    MoveInputSchema,
 )
 from app.enums.game import PlayerRoleEnum, GameStateEnum, PlayerResultEnum, PlayerResultReasonEnum
 from app.core import exceptions
@@ -28,22 +29,54 @@ class GameMetaWrapper:
     delete: bool = False
 
 
+@dataclass(frozen=True)
+class MoveMetaWrapper:
+    """  """
+    move: Move
+    game: Game
+
+
 class Board(list[list[int]]):
-    def __init__(self, iterable: list[list[int]]):
-        self.__validate_init(iterable)
-        super().__init__(iterable)
 
     @classmethod
     def default(cls, fill: int = 0, *, size: int) -> 'Board':
         array = [[fill for _ in range(size)] for _ in range(size)]
         return cls(array)
 
-    @staticmethod
-    def __validate_init(iterable: list[list[int]]) -> None:
-        if not all(isinstance(obj, list) for obj in iterable):
-            raise TypeError('Board must be 2D list.')
-        if not all(len(obj) == len(iterable) for obj in iterable):
+    @classmethod
+    def from_string(cls, string: str) -> 'Board':
+        """
+        :param string: Игровая доска в строковом виде (из БД)
+        :raise ValueError: если строка не соотв. формату "ddd.ddd.ddd"
+        """
+        array = [[int(cell) for cell in row] for row in string.split('.')]
+        if not all(len(obj) == len(array) for obj in array):
             raise ValueError('Board must be square.')
+        return cls(array)
+
+    def to_string(self) -> str:
+        return '.'.join(''.join(str(cell) for cell in row) for row in self)
+
+    def move(self, cell: MoveInputSchema):
+        print(f'{cell.value = }')
+        print(f'cell: {cell.x} {cell.y}')
+        if self[cell.y - 1][cell.x - 1]:
+            raise exceptions.CellOccupied()
+        self[cell.y - 1][cell.x - 1] = cell.value
+
+    def check_victory(self) -> int:
+        """
+        Определяет, выполняется ли условие "5 в ряд"
+
+        :return: значение соотв. клеток, либо 0, если условие не выполнено
+        """
+        return 0
+
+    def check_free_space(self) -> bool:
+        """
+        :return: True, если на доске есть место для ходов
+        """
+        return True
 
 
 class GameService:
@@ -80,7 +113,7 @@ class GameService:
         if rules.three_players:
             game.num_players = 3
 
-        game.board = Board.default(size=rules.board_size)
+        game.board = Board.default(size=rules.board_size).to_string()
 
         pr = PlayerRole(role=PlayerRoleEnum.first)
         pr.player = creator
@@ -284,21 +317,24 @@ class GameService:
             if pr.can_move:
                 return pr.role
 
-    async def get_role_next_to_move(self, game: Game) -> PlayerRoleEnum:
+    async def get_role_next_to_move(self, game: Game, previous: PlayerRoleEnum) -> PlayerRoleEnum:
         pr_enums = await self.__get_player_role_enums(game)
-        role_ready_to_move = await self.get_role_ready_to_move(game)
-        if not role_ready_to_move:
+        if not previous:
             return pr_enums[0]
         try:
-            return pr_enums[pr_enums.index(role_ready_to_move) + 1]
+            return pr_enums[pr_enums.index(previous) + 1]
         except IndexError:
             return pr_enums[0]
-        except ValueError:      # index() не нашел элемент
+        except ValueError:  # index() не нашел элемент
             raise
 
     async def switch_turn_order(self, game: Game) -> Game:
-        role_next_to_move = await self.get_role_next_to_move(game)
+        role_ready_to_move = await self.get_role_ready_to_move(game)
+        role_next_to_move = await self.get_role_next_to_move(game, previous=role_ready_to_move)
+        previous_player = await self.__get_player_by_role(game, role=role_ready_to_move)
         current_player = await self.__get_player_by_role(game, role=role_next_to_move)
+        if previous_player:
+            previous_player.can_move = False
         current_player.can_move = True
         await self.__db.commit()
         await self.__db.refresh(game)
@@ -315,10 +351,70 @@ class GameService:
 
     async def attempt_to_start_game(self, game: Game) -> Game | None:
         if all([
-            await self.__get_empty_seat(game) is None,      # свободных мест нет, все заняты
-            await self.__check_players_ready(game),         # READY=True у всех игроков
+            await self.__get_empty_seat(game) is None,  # свободных мест нет, все заняты
+            await self.__check_players_ready(game),  # READY=True у всех игроков
         ]):
             return await self.start_game(game)
+
+    async def move(self, player: User, cell: MoveInputSchema, game_id: uuid.UUID) -> MoveMetaWrapper:
+        if (game := await self.get_game(game_id)) is None:
+            raise exceptions.NoGameFound()
+        if not await self.__check_user_in_game(user=player, game=game):
+            raise exceptions.NotInGame()
+        pr = await self.__get_game_player_association(game, player)
+        pr_enums = await self.__get_player_role_enums(game)
+        if pr.role not in pr_enums:
+            raise exceptions.NotAPlayer()
+        if not pr.can_move:
+            # пришел клик от игрока, который по идее и не мог ходить. Просто игнорим, никаких сбщ в ответ.
+            # allow_move=false у него и так проставилось там, раз еще не было. 2 раз не кликнет
+            raise exceptions.FalseClick()
+        # создаем Board из game.board
+        board = Board.from_string(game.board)
+        # делаем board.move(move_obj)
+        cell.value = int(pr.role.value)
+        try:
+            # print(f'BEFORE {board = }')
+            board.move(cell)
+            # print(f'AFTER {board = }')
+        except IndexError as e:
+            # может возникнуть в теории
+            raise e
+        except exceptions.CellOccupied:
+            # если клетка занята - запрос надо игнорировать так же, как при not player.can_move
+            raise exceptions.FalseClick()
+
+        # если успешно (клетка не занята) - пишем Move в БД, пишем Baord в game.board
+        move = Move()
+        move.role = pr.role
+        move.x = cell.x
+        move.y = cell.y
+        game.moves.append(move)
+
+        game.board = board.to_string()
+
+        await self.__db.commit()
+        await self.__db.refresh(game)
+        await self.__db.refresh(move)
+        # print(f'{game.board = }')
+
+        # вызываем проверок в Board
+        # от результата проверок зависит шо делаем и шо отправляем обратно
+        if winner_num := board.check_victory():
+            # условие 5 в ряд выполнено, имеем номер роли победителя (1 / 2 / 3)
+            pr_enum = PlayerRoleEnum(str(winner_num))
+            pr = await self.__get_player_by_role(game, pr_enum)
+            game = await self.__set_players_result(players=[pr], game=game, result=PlayerResultEnum.win,
+                                                   reason=PlayerResultReasonEnum.fair)
+            return MoveMetaWrapper(move=move, game=await self.finish_game(game, reason=PlayerResultReasonEnum.fair))
+        if not board.check_free_space():
+            # делать ходы больше некуда. Всем оставшимся игрокам ставим ничью
+            active_players = await self.__get_players(game, only_active=True)
+            game = await self.__set_players_result(players=active_players, game=game, result=PlayerResultEnum.draw,
+                                                   reason=PlayerResultReasonEnum.full_board)
+            return MoveMetaWrapper(move=move, game=await self.finish_game(game))
+        # игра продолжается
+        return MoveMetaWrapper(move=move, game=await self.switch_turn_order(game))
 
     async def leave(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
         if (game := await self.get_game(game_id)) is None:
@@ -355,41 +451,52 @@ class GameService:
         if len(players) == 1:
             return GameMetaWrapper(game=game, delete=True)
 
-        game = await self.__set_player_result(
-            pr=pr,
-            game=game,
-            result=PlayerResultEnum.lose,
-            reason=PlayerResultReasonEnum.concede,
-        )
+        game = await self.__set_players_result(players=[pr], game=game, result=PlayerResultEnum.lose,
+                                               reason=PlayerResultReasonEnum.concede)
         active_players = await self.__get_players(game, only_active=True)
         num_active_players = len(active_players)
         if num_active_players > 1:
             return GameMetaWrapper(game=game)
         if num_active_players == 1:
-            game = await self.__set_player_result(
-                pr=active_players[0],
-                game=game,
-                result=PlayerResultEnum.win,
-                reason=PlayerResultReasonEnum.tech,
-            )
+            game = await self.__set_players_result(players=active_players, game=game, result=PlayerResultEnum.win,
+                                                   reason=PlayerResultReasonEnum.tech)
         return GameMetaWrapper(game=await self.finish_game(game))
 
-    async def __set_player_result(
+    async def __set_players_result(
             self,
-            pr: PlayerRole,
+            players: list[PlayerRole],
             game: Game,
             result: PlayerResultEnum,
             reason: PlayerResultReasonEnum,
     ) -> Game:
-        pr.result.result = result
-        pr.result.reason = reason
+        """
+        :param players: список ORM-объектов игроков, которым проставляются результаты
+        :param game: ORM-объект соответствующей игры
+        :param result: проставляемый результат
+        :param reason: причина проставляемого результата
+        :return: обновленный ORM-объект соответствующей игры
+        """
+        if not players:
+            return game
+        for pr in players:
+            pr.result.result = result
+            pr.result.reason = reason
         await self.__db.commit()
         await self.__db.refresh(game)
         return game
 
-    async def finish_game(self, game: Game) -> Game:
-        # - - - простановка непроставленных результатов? - - -
+    async def finish_game(self, game: Game, reason: PlayerResultReasonEnum = PlayerResultReasonEnum.tech) -> Game:
+        """
+        Завершает игру
 
+        :param game: ORM-объект завершаемой игры
+        :param reason: причина завершения игры
+        :return: ORM-объект завершенной игры
+        """
+        # простановка поражения игрокам с еще не проставленным результатом
+        active_players = await self.__get_players(game, only_active=True)
+        game = await self.__set_players_result(players=active_players, game=game, result=PlayerResultEnum.lose,
+                                               reason=reason)
         game.state = GameStateEnum.finished
         game.finished_at = datetime.now()
         await self.__db.commit()

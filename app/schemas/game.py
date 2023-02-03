@@ -63,14 +63,18 @@ class PlayerSchema(BaseModel):
         orm_mode = True
 
 
-class MoveSchema(BaseModel):
-    id: int
-    player: UserRead
-    x_coord: int = Field(..., ge=0)
-    y_coord: int = Field(..., ge=0)
+class MoveInputSchema(BaseModel):
+    value: int = Field(0, ge=0, le=3)
+    x: int = Field(..., ge=0)
+    y: int = Field(..., ge=0)
 
     class Config:
         orm_mode = True
+
+
+class MoveSchema(MoveInputSchema):
+    id: int
+    role: PlayerRoleEnum
 
 
 class GameJoinSchema(GameBaseSchema):
@@ -91,7 +95,7 @@ class GameSchema(GameCreateSchema):
     board_size: int = Field(..., gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool = Field(..., description='Включить классические правила рэндзю')
     with_myself: bool = Field(..., description='Игра с самим собой')
-    board: list[list[int]]
+    board: str | list[list[int]]
     created_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
@@ -123,6 +127,7 @@ class GameSchemaOut(GameSchema):
         schema.player_3 = instance.get_player_by_role(PlayerRoleEnum.third)
         schema.spectators = instance.get_spectators()
         schema.players = None
+        schema.board = [[int(cell) for cell in row] for row in schema.board.split('.')]     # дубл. Board.from_string()
         return schema
 
     def current_player(self) -> PlayerSchema | None:

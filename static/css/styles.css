@@ -455,6 +455,27 @@ div.icon-wrapper {
     color: white;
 }
 
+.move-record {
+    margin: 3px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+.move-record-white {
+    color: var(--dark);
+    background-color: white;
+    border-color: var(--dark);
+}
+.move-record-black {
+    color: white;
+    background-color: black;
+    border-color: black;
+}
+.move-record-gray {
+    color: white;
+    background-color: var(--grey);
+    border-color: var(--dark);
+}
+
 .game-item {
     display: flex;
     flex-wrap: wrap;

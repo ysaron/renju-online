@@ -13,7 +13,7 @@ from app.api.services.games import GameService
 from app.auth.deps import get_current_user_dependency
 from app.auth.services import UserService
 from app.models.user import User
-from app.schemas.game import GameCreateSchema, GameSchemaOut, GameSchema, PlayerSchema, GameJoinSchema
+from app.schemas.game import GameCreateSchema, GameSchemaOut, GameJoinSchema, MoveInputSchema
 from app.schemas import message
 from app.enums.game import GameStateEnum, PlayerRoleEnum
 
@@ -207,6 +207,39 @@ class RenjuWSEndpoint(WebSocketActions):
         except exceptions.NotAPlayer:
             pass
         except Exception as e:
+            raise e
+
+    async def move(self, connection: WSConnection, data: Any) -> None:
+        try:
+            game_input_data = GameJoinSchema(id=uuid.UUID(data['game_id']))
+            move_input_data = MoveInputSchema(x=data['x'], y=data['y'])
+            async with async_session_context() as db:
+                user = await UserService(db).get_user_by_id(connection.user_id)
+                move_meta = await GameService(db).move(player=user, cell=move_input_data, game_id=game_input_data.id)
+                user_ids = [pr.player.id for pr in move_meta.game.players]
+                game_schema = GameSchemaOut.from_orm(move_meta.game)
+                await self.manager.limited_broadcast(
+                    user_ids=user_ids,
+                    message=message.MoveMessage(game=move_meta.game, move=move_meta.move),
+                )
+                if move_meta.game.state == GameStateEnum.pending:
+                    current_player = game_schema.current_player()
+                    print(f'{current_player.role = }')
+                    await self.manager.send_message(
+                        websocket=self.manager.active_connections.get_websocket(user_id=current_player.player.id),
+                        message=message.UnblockBoardMessage(game=game_schema),
+                    )
+                if move_meta.game.state == GameStateEnum.finished:
+                    await self.manager.limited_broadcast(
+                        user_ids=user_ids,
+                        message=message.GameFinishedMessage(game=game_schema),
+                    )
+                    await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
+        except exceptions.FalseClick:
+            pass
+        except Exception as e:
+            # Мб разблокировать снова борду для этого юзера? Он же не сделал ход, по идее.
+            # Или мог?
             raise e
 
 

@@ -13,6 +13,10 @@ const btnLeave = document.getElementById("btn-leave")
 
 let currentBoards = {};
 
+function updateCurrentGames(game) {
+    currentBoards[game.id].gameObj = game;
+}
+
 function openGame(game, my_role) {
     console.log("game:", game);
     console.log("me:", my_role);
@@ -21,63 +25,70 @@ function openGame(game, my_role) {
 
     if (!currentBoards[game.id]) {
         currentBoards[game.id] = {
-            boardArr: game.board,
+            gameObj: game,
             allow_moves: false,
             role: my_role
         };
     }
-    buildBoard(game.board);
+    buildBoard(game);
 
     renderGameInfo(game);
     showPlayersSection(game);
     renderPlayers(game);
     renderControls(game, my_role);
+    console.log("OpenGame ", currentBoards);
 }
 
 function playerJoined(game, playerName) {
     console.log(`${playerName} joined!`);
     renderPlayers(game);
+    updateCurrentGames(game);
 }
 
 function playerReady(game, playerName, playerRole) {
     console.log(`${playerName} ready!`);
     btnLeave.innerHTML = "Concede";
     renderPlayers(game);
+    updateCurrentGames(game);
 }
 
 function spectatorJoined(game) {
+    updateCurrentGames(game);
 }
 
 function playerLeft(game, playerName) {
     console.log(`${playerName} left...`);
+    updateCurrentGames(game);
 }
 
 function spectatorLeft(game) {
+    updateCurrentGames(game);
 }
 
-function buildBoard(board) {
+function buildBoard(game) {
     console.log(currentBoards);
-    // board: 2D Array 15х15 or 30х30
+    // game.board: 2D Array 15х15 or 30х30
     clearBoard();
     let cellsArr = [];
-    for (let y = 1; y <= board.length; y++) {
+    for (let y = 1; y <= game.board.length; y++) {
         let cellsRow = [];
-        for (let x = 1; x <= board[y-1].length; x++) {
+        for (let x = 1; x <= game.board[y-1].length; x++) {
             let cell = document.createElement("div");
             cell.classList.add("cell");
-            cell.innerHTML = `${x}-${y}`;
             cell.dataset.x = x;
             cell.dataset.y = y;
             cell.addEventListener("mouseover", highlightCell);
             cell.addEventListener("mouseleave", cancelHighlightCell);
+            cell.addEventListener("click", cellClicked);
             cellsRow.push(cell);
         }
         cellsArr.push(cellsRow);
     }
     cellsArr.reverse();
 
-    boardBlock.style.gridTemplateColumns = `repeat(${board.length}, minmax(0, 1fr))`;
-    boardBlock.style.gridTemplateRows = `repeat(${board.length}, minmax(0, 1fr))`;
+    boardBlock.dataset.gameid = game.id;
+    boardBlock.style.gridTemplateColumns = `repeat(${game.board.length}, minmax(0, 1fr))`;
+    boardBlock.style.gridTemplateRows = `repeat(${game.board.length}, minmax(0, 1fr))`;
 
     for (let row of cellsArr) {
         for (let cell of row) {
@@ -86,16 +97,16 @@ function buildBoard(board) {
     }
 
     // Axes
-    xAxis.style.gridTemplateColumns = `repeat(${board[0].length}, minmax(0, 1fr))`;
-    yAxis.style.gridTemplateRows = `repeat(${board.length}, minmax(0, 1fr))`;
-    for (let y = board.length; y >= 1; y--) {
+    xAxis.style.gridTemplateColumns = `repeat(${game.board[0].length}, minmax(0, 1fr))`;
+    yAxis.style.gridTemplateRows = `repeat(${game.board.length}, minmax(0, 1fr))`;
+    for (let y = game.board.length; y >= 1; y--) {
         let axisCell = document.createElement("div");
         axisCell.classList.add("axis-cell");
         axisCell.innerHTML = y;
         axisCell.dataset.y = y;
         yAxis.appendChild(axisCell);
     }
-    for (let x = 1; x <= board.length; x++) {
+    for (let x = 1; x <= game.board.length; x++) {
         let axisCell = document.createElement("div");
         axisCell.classList.add("axis-cell");
         axisCell.innerHTML = x;
@@ -222,25 +233,29 @@ function gameStarted(game) {
     renderPlayers(game);
     console.log("Game started");
     console.log(game);
+    updateCurrentGames(game);
 }
 
-function unblockBoard(game) {
-    currentBoards[game.id].allow_moves = true;
+function unblockBoard(game_id) {
+    currentBoards[game_id].allow_moves = true;
     console.log("YOUR TURN!");
 }
 
-function blockBoard(game) {
-    currentBoards[game.id].allow_moves = false;
+function blockBoard(game_id) {
+    currentBoards[game_id].allow_moves = false;
 }
 
 function gameRemoved(game_id) {
     alert("This game has been removed.");
     showMainScreen();
+    console.log("FORGET GAME gameRemoved");
+    forgetGame(game_id);
 }
 
 function updateGame(game) {
     console.log("The game has been updated. Re-render players...");
     renderPlayers(game);
+    updateCurrentGames(game);
 }
 
 function leaveGame(event) {
@@ -248,7 +263,8 @@ function leaveGame(event) {
 }
 
 function leftGame(game) {
-    delete currentBoards[game.id];
+    console.log("FORGET GAME leftGame");
+    forgetGame(game.id);
     showMainScreen();
 }
 
@@ -256,24 +272,45 @@ function gameFinished(game) {
     hideActiveGameMarker();
     renderPlayers(game);
     alert(`The game has been finished. Result: ${game.result}`);
-    delete currentBoards[game.id];
+    console.log("FORGET GAME gameFinished");
+    forgetGame(game.id);
     showMainScreen();
 }
 
 function getXAxisCell(cell) {
+    let x;
+    if (cell.classList.contains("cell")) {
+        x = cell.dataset.x;
+    } else {
+        x = cell.parentNode.dataset.x;
+    }
     for (let aCell of xAxis.children) {
-        if (aCell.dataset.x == cell.dataset.x) return aCell
+        if (aCell.dataset.x == x) return aCell
     }
 }
 
 function getYAxisCell(cell) {
+    let y;
+    if (cell.classList.contains("cell")) {
+        y = cell.dataset.y;
+    } else {
+        y = cell.parentNode.dataset.y;
+    }
     for (let aCell of yAxis.children) {
-        if (aCell.dataset.y == cell.dataset.y) return aCell
+        if (aCell.dataset.y == y) return aCell
+    }
+}
+
+function getCell(x, y) {
+    for (let cell of boardBlock.children) {
+        if (cell.dataset.x == x && cell.dataset.y == y) return cell
     }
 }
 
 function highlightCell(event) {
-    event.target.classList.add("cell-highlight");
+    if (event.target.classList.contains("cell")) {
+        event.target.classList.add("cell-highlight");
+    }
     let xAxisCell = getXAxisCell(event.target);
     let yAxisCell = getYAxisCell(event.target);
     xAxisCell.classList.add("axis-cell-highlight");
@@ -286,4 +323,47 @@ function cancelHighlightCell(event) {
     let yAxisCell = getYAxisCell(event.target);
     xAxisCell.classList.remove("axis-cell-highlight");
     yAxisCell.classList.remove("axis-cell-highlight");
+}
+
+function cellClicked(event) {
+    let game_id = boardBlock.dataset.gameid;
+    let gameData = currentBoards[game_id];
+    if (!gameData.allow_moves) return;
+    blockBoard(game_id);
+    let x = event.target.dataset.x;
+    let y = event.target.dataset.y;
+    console.log(`Click! x${x}-y${y}`);
+    send({action: "move", game_id: game_id, x: x, y: y});
+}
+
+function renderMove(game, move) {
+    console.log("renderMove ", currentBoards);
+    updateCurrentGames(game);
+    let cell = getCell(move.x, move.y);
+    let chip = document.createElement("div");
+    let color;
+    console.log("move.role ", move.role);
+    switch (move.role) {
+        case "1":
+            color = "white";
+            break;
+        case "2":
+            color = "black";
+            break;
+        case "3":
+            color = "gray";
+            break;
+        default:
+            break;
+    }
+    chip.classList.add("chip", `chip-${color}`);
+    cell.appendChild(chip);
+    cell.removeEventListener("click", cellClicked);
+
+    renderPlayers(game);
+
+    let moveRecord = document.createElement("div");
+    moveRecord.innerHTML = `x${move.x}-y${move.y}`;
+    moveRecord.classList.add("move-record", `move-record-${color}`);
+    movesPanel.appendChild(moveRecord);
 }

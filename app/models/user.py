@@ -18,5 +18,5 @@ class User(UuidIdMixin, Base):
 
     # One to Many
     games = relationship(PlayerRole, back_populates='player', lazy='selectin')
-    moves = relationship(Move, back_populates='player', lazy='selectin')
+    # moves = relationship(Move, back_populates='player', lazy='selectin')
     # victories = relationship(GameResult, back_populates='winner')
