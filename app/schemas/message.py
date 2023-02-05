@@ -88,6 +88,7 @@ class LeftGameMessage(BaseMessageSchema):
 class GameFinishedMessage(BaseMessageSchema):
     action: str = 'game_finished'
     game: GameSchemaOut
+    result: str = ''
 
 
 class ErrorMessage(BaseMessageSchema):

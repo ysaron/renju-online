@@ -21,10 +21,10 @@ class PlayerResultEnum(enum.Enum):
 
 
 class PlayerResultReasonEnum(enum.Enum):
-    fair = 1
-    timeout = 2
-    concede = 3
-    disconnect = 4
-    full_board = 5
-    tech = 6
-    agreement = 7
+    fair = 'five in row'
+    timeout = 'timeout'
+    concede = 'concede'
+    disconnect = 'disconnect'
+    full_board = 'the board is full'
+    tech = 'technical'
+    agreement = 'agreement'

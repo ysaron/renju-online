@@ -287,7 +287,7 @@ function wsDispatcher() {
                 leftGame(data.game);
                 break;
             case "game_finished":
-                gameFinished(data.game);
+                gameFinished(data.game, data.result);
                 break;
             case "error":
                 alert(data.detail);

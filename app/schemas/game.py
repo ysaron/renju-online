@@ -137,6 +137,32 @@ class GameSchemaOut(GameSchema):
             if player.can_move:
                 return player
 
+    def winner(self) -> PlayerSchema | None:
+        """ Возвращает схему победителя, если он существует """
+        for player in [self.player_1, self.player_2, self.player_3]:
+            if not player:
+                continue
+            if player.result.result == PlayerResultEnum.win:
+                return player
+
+    def draw_players(self) -> list[PlayerSchema]:
+        """ Список игроков, которым зачтена ничья """
+        players = []
+        for player in [self.player_1, self.player_2, self.player_3]:
+            if not player:
+                continue
+            if player.result.result == PlayerResultEnum.draw:
+                players.append(player)
+        return players
+
+    def verbose_result(self) -> str:
+        """ Результат игры для отображения игрокам по ее окончании """
+        if winner := self.winner():
+            return f'{winner.player.name} won! ({winner.result.reason.value})'
+        if draw_players := self.draw_players():
+            return f'Draw ({draw_players[0].result.reason.value})'
+        return ''
+
 
 class GameFullSchema(GameSchema):
     started_at: datetime | None = None

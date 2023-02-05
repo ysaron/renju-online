@@ -199,9 +199,10 @@ class RenjuWSEndpoint(WebSocketActions):
 
                 if game_meta.game.state == GameStateEnum.finished:
                     # отображаем результат участникам
+                    verbose_result = game_schema.verbose_result()
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
-                        message=message.GameFinishedMessage(game=game_schema),
+                        message=message.GameFinishedMessage(game=game_schema, result=verbose_result),
                     )
 
         except exceptions.NotAPlayer:
@@ -230,9 +231,10 @@ class RenjuWSEndpoint(WebSocketActions):
                         message=message.UnblockBoardMessage(game=game_schema),
                     )
                 if move_meta.game.state == GameStateEnum.finished:
+                    verbose_result = game_schema.verbose_result()
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
-                        message=message.GameFinishedMessage(game=game_schema),
+                        message=message.GameFinishedMessage(game=game_schema, result=verbose_result),
                     )
                     await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
         except exceptions.FalseClick:

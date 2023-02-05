@@ -268,10 +268,10 @@ function leftGame(game) {
     showMainScreen();
 }
 
-function gameFinished(game) {
+function gameFinished(game, verboseResult) {
     hideActiveGameMarker();
     renderPlayers(game);
-    alert(`The game has been finished. Result: ${game.result}`);
+    alert(`The game has been finished. ${verboseResult}`);
     console.log("FORGET GAME gameFinished");
     forgetGame(game.id);
     showMainScreen();
