@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import Literal
-from dataclasses import dataclass
+from typing import Literal, NamedTuple
+from dataclasses import dataclass, field
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,17 @@ from app.enums.game import PlayerRoleEnum, GameStateEnum, PlayerResultEnum, Play
 from app.core import exceptions
 
 
+class Coord(NamedTuple):
+    x: int
+    y: int
+
+
+@dataclass
+class Cell:
+    value: int
+    coord: Coord
+
+
 @dataclass(frozen=True)
 class GameMetaWrapper:
     """ Обертка для передачи вместе с ORM-объектом Game доп. данных """
@@ -34,43 +45,109 @@ class MoveMetaWrapper:
     """  """
     move: Move
     game: Game
+    winning_cells: list[Cell] = field(default_factory=list)
 
 
-class Board(list[list[int]]):
+class RenjuBoard(list[list[Cell]]):
 
     @classmethod
-    def default(cls, fill: int = 0, *, size: int) -> 'Board':
-        array = [[fill for _ in range(size)] for _ in range(size)]
+    def default(cls, fill: int = 0, *, size: int) -> 'RenjuBoard':
+        array = [[Cell(value=fill, coord=Coord(x, y)) for x in range(1, size + 1)] for y in range(1, size + 1)]
         return cls(array)
 
     @classmethod
-    def from_string(cls, string: str) -> 'Board':
+    def from_string(cls, string: str) -> 'RenjuBoard':
         """
         :param string: Игровая доска в строковом виде (из БД)
         :raise ValueError: если строка не соотв. формату "ddd.ddd.ddd"
         """
-        array = [[int(cell) for cell in row] for row in string.split('.')]
+        array = []
+        for y, row in enumerate(string.split('.'), start=1):
+            array_row = []
+            for x, value in enumerate(row, start=1):
+                cell = Cell(value=int(value), coord=Coord(x, y))
+                array_row.append(cell)
+            array.append(array_row)
         if not all(len(obj) == len(array) for obj in array):
             raise ValueError('Board must be square.')
         return cls(array)
 
-    def to_string(self) -> str:
-        return '.'.join(''.join(str(cell) for cell in row) for row in self)
+    @property
+    def as_string(self) -> str:
+        return '.'.join(''.join(str(cell.value) for cell in row) for row in self)
 
-    def move(self, cell: MoveInputSchema):
-        print(f'{cell.value = }')
-        print(f'cell: {cell.x} {cell.y}')
-        if self[cell.y - 1][cell.x - 1]:
+    @property
+    def as_array(self) -> list[list[int]]:
+        return [[cell.value for cell in row] for row in self]
+
+    @property
+    def columns(self) -> list[list[Cell]]:
+        return [list(col) for col in zip(*self)]
+
+    @property
+    def diagonals(self) -> list[list[Cell]]:
+        primary_diagonals = []
+        secondary_diagonals = []
+        for offset in range(1 - len(self), len(self)):
+            prim_diag = []
+            sec_diag = []
+            for i, row in enumerate(self):
+                if -len(row) < offset - i <= 0:
+                    prim_diag.append(row[offset - i - 1])
+                if 0 <= i + offset < len(row):
+                    sec_diag.append(row[i + offset])
+            primary_diagonals.append(prim_diag)
+            secondary_diagonals.append(sec_diag)
+        return primary_diagonals + secondary_diagonals
+
+    def move(self, new_cell: MoveInputSchema):
+        print(f'{new_cell.value = }')
+        print(f'cell: {new_cell.x} {new_cell.y}')
+        if self[new_cell.y - 1][new_cell.x - 1].value:
             raise exceptions.CellOccupied()
-        self[cell.y - 1][cell.x - 1] = cell.value
+        self[new_cell.y - 1][new_cell.x - 1].value = new_cell.value
 
-    def check_victory(self) -> int:
+    @staticmethod
+    def __check_line(line: list[Cell], length: int = 5) -> list[Cell]:
         """
-        Определяет, выполняется ли условие "5 в ряд"
+        Проверка, содержит ли линия ``length`` одинаковых значений подряд
 
-        :return: значение соотв. клеток, либо 0, если условие не выполнено
+        :return: список победных клеток
         """
-        return 0
+        current_value = 0
+        counter = 0
+        winning_cells = []
+        for cell in line:
+            if cell.value == 0:
+                winning_cells.clear()
+                current_value = 0
+                counter = 0
+                continue
+            winning_cells.append(cell)
+            if cell.value == current_value:
+                counter += 1
+                if counter >= length:
+                    return winning_cells
+            else:
+                counter = 1
+            current_value = cell.value
+        return []
+
+    def check_victory(self) -> list[Cell]:
+        """
+        :return: список клеток-победителей либо пустой список, если условие победы не выполнено
+        """
+        for row in self:
+            if winning_cells := self.__check_line(row):
+                # return winning_cells[0].value, [cell.coord for cell in winning_cells]
+                return winning_cells
+        for column in self.columns:
+            if winning_cells := self.__check_line(column):
+                return winning_cells
+        for diagonal in self.diagonals:
+            if winning_cells := self.__check_line(diagonal):
+                return winning_cells
+        return []
 
     def check_free_space(self) -> bool:
         """
@@ -113,7 +190,7 @@ class GameService:
         if rules.three_players:
             game.num_players = 3
 
-        game.board = Board.default(size=rules.board_size).to_string()
+        game.board = RenjuBoard.default(size=rules.board_size).as_string
 
         pr = PlayerRole(role=PlayerRoleEnum.first)
         pr.player = creator
@@ -370,7 +447,7 @@ class GameService:
             # allow_move=false у него и так проставилось там, раз еще не было. 2 раз не кликнет
             raise exceptions.FalseClick()
         # создаем Board из game.board
-        board = Board.from_string(game.board)
+        board = RenjuBoard.from_string(game.board)
         # делаем board.move(move_obj)
         cell.value = int(pr.role.value)
         try:
@@ -391,7 +468,7 @@ class GameService:
         move.y = cell.y
         game.moves.append(move)
 
-        game.board = board.to_string()
+        game.board = board.as_string
 
         await self.__db.commit()
         await self.__db.refresh(game)
@@ -400,13 +477,17 @@ class GameService:
 
         # вызываем проверок в Board
         # от результата проверок зависит шо делаем и шо отправляем обратно
-        if winner_num := board.check_victory():
-            # условие 5 в ряд выполнено, имеем номер роли победителя (1 / 2 / 3)
-            pr_enum = PlayerRoleEnum(str(winner_num))
+        if winning_cells := board.check_victory():
+            # условие 5 в ряд выполнено
+            pr_enum = PlayerRoleEnum(str(winning_cells[0].value))
             pr = await self.__get_player_by_role(game, pr_enum)
             game = await self.__set_players_result(players=[pr], game=game, result=PlayerResultEnum.win,
                                                    reason=PlayerResultReasonEnum.fair)
-            return MoveMetaWrapper(move=move, game=await self.finish_game(game, reason=PlayerResultReasonEnum.fair))
+            return MoveMetaWrapper(
+                move=move,
+                game=await self.finish_game(game, reason=PlayerResultReasonEnum.fair),
+                winning_cells=winning_cells,
+            )
         if not board.check_free_space():
             # делать ходы больше некуда. Всем оставшимся игрокам ставим ничью
             active_players = await self.__get_players(game, only_active=True)

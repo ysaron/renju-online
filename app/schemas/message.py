@@ -89,6 +89,7 @@ class GameFinishedMessage(BaseMessageSchema):
     action: str = 'game_finished'
     game: GameSchemaOut
     result: str = ''
+    winning_cells_coords: list[tuple[int, int]] = []
 
 
 class ErrorMessage(BaseMessageSchema):

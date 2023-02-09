@@ -234,7 +234,11 @@ class RenjuWSEndpoint(WebSocketActions):
                     verbose_result = game_schema.verbose_result()
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
-                        message=message.GameFinishedMessage(game=game_schema, result=verbose_result),
+                        message=message.GameFinishedMessage(
+                            game=game_schema,
+                            result=verbose_result,
+                            winning_cells_coords=[cell.coord for cell in move_meta.winning_cells],
+                        ),
                     )
                     await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
         except exceptions.FalseClick:

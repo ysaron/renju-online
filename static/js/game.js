@@ -268,11 +268,12 @@ function leftGame(game) {
     showMainScreen();
 }
 
-function gameFinished(game, verboseResult) {
+function gameFinished(game, verboseResult, winningCellsCoords) {
     hideActiveGameMarker();
     renderPlayers(game);
-    alert(`The game has been finished. ${verboseResult}`);
+    alert(`The game has been finished. ${verboseResult} --- ${winningCellsCoords}`);
     console.log("FORGET GAME gameFinished");
+    console.log(winningCellsCoords);
     forgetGame(game.id);
     showMainScreen();
 }
