@@ -369,6 +369,8 @@ div.icon-wrapper {
     width: 13%;
     border-radius: 10px;
     background: white;
+    max-height: 500px;
+    overflow-y: auto;
 }
 .board-wrapper {
     width: 70%;

@@ -119,6 +119,7 @@ function clearBoard() {
     boardBlock.innerHTML = "";
     xAxis.innerHTML = "";
     yAxis.innerHTML = "";
+    movesPanel.innerHTML = "";
 }
 
 function renderGameInfo(game) {
