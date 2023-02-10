@@ -153,7 +153,11 @@ class RenjuBoard(list[list[Cell]]):
         """
         :return: True, если на доске есть место для ходов
         """
-        return True
+        for row in self:
+            for cell in row:
+                if not cell.value:
+                    return True
+        return False
 
 
 class GameService:
@@ -494,7 +498,7 @@ class GameService:
             game = await self.__set_players_result(players=active_players, game=game, result=PlayerResultEnum.draw,
                                                    reason=PlayerResultReasonEnum.full_board)
             return MoveMetaWrapper(move=move, game=await self.finish_game(game))
-        # игра продолжается
+        # иначе игра продолжается
         return MoveMetaWrapper(move=move, game=await self.switch_turn_order(game))
 
     async def leave(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
