@@ -295,9 +295,10 @@ function sendFormLogin(event) {
             getMe(response.access_token).then(myData => {
                 sessionStorage.setItem('username', myData.name);
                 sessionStorage.setItem('id', myData.id);
+                openWS();
             })
                 .then(myData => {
-                    let username = sessionStorage.getItem('username')
+                    let username = sessionStorage.getItem('username');
                     showUsername(username);
                 })
                 .catch(err => {console.log(err)})
@@ -307,7 +308,6 @@ function sendFormLogin(event) {
             screenMainNotLoggedHide();
             screenMainLoggedShow();
             modalLoginClose();
-            openWS();
         })
         .catch(response => response.json().then(response => {
             let info = getErrorInfo(response);

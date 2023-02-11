@@ -93,12 +93,12 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 700px;
+    height: 736px;
 }
 
 .screens-container {
     width: 75%;
-    height: 600px;
+    height: 670px;
     position: relative;
 }
 
@@ -112,6 +112,11 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     color: white;
 }
 .online-block .online-text {padding-left: 5px;}
+.online-block .online-name {
+    padding-left: 5px;
+    font-weight: bolder;
+    color: var(--green);
+}
 .online-counter-block {
     display: none;
     align-items: center;
@@ -151,7 +156,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     border-radius: 10px;
     box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.5) inset, -4px -4px 10px 2px rgba(0, 0, 0, 0.5) inset;
 
-    max-height: 600px;
+    max-height: 670px;
     overflow: auto;
 }
 

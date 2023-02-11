@@ -269,16 +269,6 @@ function leftGame(game) {
     showMainScreen();
 }
 
-function gameFinished(game, verboseResult, winningCellsCoords) {
-    hideActiveGameMarker();
-    renderPlayers(game);
-    alert(`The game has been finished. ${verboseResult} --- ${winningCellsCoords}`);
-    console.log("FORGET GAME gameFinished");
-    console.log(winningCellsCoords);
-    forgetGame(game.id);
-    showMainScreen();
-}
-
 function getXAxisCell(cell) {
     let x;
     if (cell.classList.contains("cell")) {
@@ -307,6 +297,26 @@ function getCell(x, y) {
     for (let cell of boardBlock.children) {
         if (cell.dataset.x == x && cell.dataset.y == y) return cell
     }
+}
+
+function highlightWinningCells(coordinates) {
+    for (let coord of coordinates) {
+        let cell = getCell(coord[0], coord[1]);
+        cell.classList.add("cell-highlight");
+        cell.removeEventListener("mouseover", highlightCell);
+        cell.removeEventListener("mouseleave", cancelHighlightCell);
+    }
+}
+
+function gameFinished(game, verboseResult, winningCellsCoords) {
+    hideActiveGameMarker();
+    renderPlayers(game);
+    highlightWinningCells(winningCellsCoords);
+    alert(`The game has been finished. ${verboseResult} --- ${winningCellsCoords}`);
+    console.log("FORGET GAME gameFinished");
+    console.log(winningCellsCoords);
+    forgetGame(game.id);
+    showMainScreen();
 }
 
 function highlightCell(event) {

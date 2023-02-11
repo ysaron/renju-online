@@ -322,17 +322,21 @@ function closeWS() {
 function setMeOnline() {
     let indicator = onlineBlock.querySelector(".indicator");
     let onlineText = onlineBlock.querySelector(".online-text");
+    let onlineName = onlineBlock.querySelector(".online-name");
     indicator.className = "";
     indicator.classList.add("indicator", "indicator-green");
-    onlineText.innerHTML = "Online";
+    onlineText.innerHTML = "Online:";
+    onlineName.innerHTML = sessionStorage.getItem('username');
 }
 
 function setMeOffline() {
     let indicator = onlineBlock.querySelector(".indicator");
     let onlineText = onlineBlock.querySelector(".online-text");
+    let onlineName = onlineBlock.querySelector(".online-name");
     indicator.className = "";
     indicator.classList.add("indicator", "indicator-red");
     onlineText.innerHTML = "Offline";
+    onlineName.innerHTML = "";
 }
 
 function updateTotalOnline(number) {
