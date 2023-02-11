@@ -1,8 +1,8 @@
 :root {
     --dark: #282828;
-    --blue: #000099;
+    --blue: #000066;
     --green: #009900;
-    --red: #cc0000;
+    --red: #b30000;
     --grey: #666666;
 }
 
@@ -20,14 +20,6 @@ body {
     font-size: 19px;
     line-height: 24px;
     /*position: fixed;*/
-}
-
-button {
-    font-family: monospace;
-    color: var(--blue);
-    font-size: 19px;
-    border: 2px solid white;
-    border-radius: 10px;
 }
 
 h1 {
@@ -79,15 +71,6 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     outline: 2px solid white;
     background-color: white;
 }
-
-/*
-.container {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    width: 306px;
-    margin: 50px auto;
-}
-*/
 
 .container {
     display: flex;
@@ -222,10 +205,14 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     display: none;
 }
 
+button {
+    font-family: monospace;
+    font-size: 19px;
+}
+
 .btn {
-    /*margin: 10px 15px 0 0;*/
     color: white;
-    background-color: var(--blue);
+    background-color: #333333;
     align-self: center;
     border: 2px solid white;
     border-radius: 10px;
@@ -236,7 +223,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 
 .btn:hover {
     background-color: white;
-    color: var(--blue);
+    color: var(--dark);
     border-color: var(--dark);
     cursor: pointer;
     transition: 0.3s;
@@ -257,7 +244,7 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 }
 
 .btn-home {
-    background-color: var(--green);
+    background-color: var(--blue);
 }
 
 .btn-create-game {
@@ -270,6 +257,16 @@ input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
 
 .btn-my-stats {
 
+}
+
+.btn-concede {
+    border-color: var(--red);
+    color: var(--red);
+}
+.btn-concede:hover {background-color: var(--red);}
+
+.btn-inactive {
+    background-color: var(--grey);
 }
 
 div.icon-wrapper {
@@ -520,8 +517,8 @@ div.icon-wrapper {
     height: 5px;
 }
 .indicator-green {
-    background-color: #4dff4d;
-    box-shadow: 0 0 5px 2px #4dff4d;
+    background-color: var(--green);
+    box-shadow: 0 0 5px 2px var(--green);
 }
 .indicator-red {
     background-color: #ff3333;
@@ -560,7 +557,7 @@ div.icon-wrapper {
     display: none;
 }
 .btn-blocked {
-    background-color: tomato;
+    background-color: var(--red);
 }
 
 .mode-block {
@@ -601,6 +598,7 @@ div.icon-wrapper {
     display: none;
     color: white;
     background-color: var(--dark);
+    border: 2px solid white;
     border-radius: 10px;
     width: 100%;
     bottom: 115%;

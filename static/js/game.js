@@ -47,7 +47,10 @@ function playerJoined(game, playerName) {
 
 function playerReady(game, playerName, playerRole) {
     console.log(`${playerName} ready!`);
-    btnLeave.innerHTML = "Concede";
+    if (playerName == sessionStorage.getItem('username')) {
+        btnLeave.innerHTML = "Concede";
+        btnLeave.classList.add("btn-concede");
+    }
     renderPlayers(game);
     updateCurrentGames(game);
 }

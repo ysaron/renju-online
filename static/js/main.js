@@ -19,7 +19,7 @@ const modalNotification = document.getElementById("modal-notification")
 
 const btnLogout = document.querySelector(".logout")
 const spanUsername = document.querySelector(".span-username")
-const btnMyStat = document.querySelector(".btn-myStat")
+const btnMyStat = document.querySelector(".btn-my-stats")
 const btnRequestVerification = document.querySelector(".request-verify")
 const btnForgotPassword = document.querySelector(".forgot-password")
 
