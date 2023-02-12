@@ -30,6 +30,8 @@ h1 {
 
 h2 {
     text-align: center;
+    font-weight: bolder;
+    font-size: 32px;
     text-shadow: -2px -2px 5px rgba(255, 255, 255, 0.5);
 }
 
@@ -51,6 +53,15 @@ ul.hor-list li {
     border-right: 1px solid var(--dark);
     padding: 0 3px;
     text-align: center;
+}
+
+#rule-list li {
+    font-size: 32px;
+    padding: 12px;
+    color: white;
+    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6),
+                 0px 8px 13px rgba(0, 0, 0, 0.3),
+                 0px 18px 23px rgba(0, 0, 0, 0.3);
 }
 
 input[type=text], input[type=password], input[type=email] {
@@ -559,6 +570,9 @@ div.icon-wrapper {
 .btn-blocked {
     background-color: var(--red);
 }
+.btn-green {
+    background-color: var(--green);
+}
 
 .mode-block {
     height: 50px;
@@ -584,9 +598,11 @@ div.icon-wrapper {
 }
 .mode-inactive {
     background-color: var(--red);
+    cursor: default;
 }
 .mode-dev {
     background-color: var(--grey);
+    cursor: default;
 }
 .mode-block:hover {
     opacity: 1;
@@ -613,6 +629,7 @@ div.icon-wrapper {
     background-color: var(--dark);
     border: 2px solid white;
     border-radius: 10px;
+    font-size: 19px;
     width: 100%;
     bottom: 115%;
     pointer-events: none;
@@ -694,7 +711,7 @@ div.icon-wrapper {
     cursor: pointer;
 }
 
-.form-signup, .form-login, .form-verify, .form-request-verify, .form-forgot-password, .form-reset-password, form-game-creation {
+.form-signup, .form-login, .form-verify, .form-request-verify, .form-forgot-password, .form-reset-password {
     display: grid;
     grid-template-columns: 280px;
     grid-template-rows: 40px 40px 40px 40px 40px;
@@ -705,6 +722,17 @@ div.icon-wrapper {
 
 .form-game-join input[type=text] {
     height: 50px;
+}
+
+.form-game-creation label {
+    font-size: 28px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.checkbox-large {
+    transform: scale(3);
+    color: var(--red);
 }
 
 .btn-signup, .btn-login, .btn-verify, .btn-forgot-password, .btn-reset-password {

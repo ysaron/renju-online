@@ -96,7 +96,7 @@ function updateCurrentRules(rules) {
     ruleList.innerHTML = "";
     const timeLimit = document.createElement("li");
     if (rules.time_limit == 0 || rules.time_limit == null) {
-        timeLimit.innerHTML = "Time limit: No";
+        timeLimit.innerHTML = "Time limit: &#8734;";
     } else {
         timeLimit.innerHTML = `Time limit: ${rules.time_limit} s`;
     }

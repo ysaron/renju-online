@@ -52,27 +52,35 @@
         {% include "home_button.html" %}
         <button type="button" class="btn btn-large btn-join-game">Join</button>
       </div>
+      <h2>New game</h2>
       <div class="section">
         <div class="section section-vert" id="mode-list">
           <h2>Modes</h2>
         </div>
         <div class="section section-vert">
-          <h2>Current rules</h2>
+          <h2>Rules</h2>
           <ul id="rule-list">
           </ul>
         </div>
       </div>
-      <div class="section">
-        <form class="form-game-creation">
-          <div class="">
-            <input type="checkbox" name="is_private" id="game-is-private">
-            <label for="game-is-private"> Is Private</label>
+      <form class="form-game-creation">
+        <div class="section">
+          <div class="section section-vert">
+            <div style="margin-top: 10px;">
+              <input type="checkbox" name="is_private" id="game-is-private" class="checkbox-large">
+              <label for="game-is-private">Private
+                <span class="question">
+                  <b>?</b>
+                  <span class="tooltip tooltip-common">The game won't appear in the general list, but will be available by ID.</span>
+                </span>
+              </label>
+            </div>
           </div>
-          <div class="">
-            <button type="submit" class="btn btn-large btn-create-game">Create</button>
+          <div class="section section-vert">
+            <button type="submit" class="btn btn-large btn-create-game btn-green">Create</button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
     <div id="game-list-screen" class="screen screen-game-list">
       <div class="section section-top">
