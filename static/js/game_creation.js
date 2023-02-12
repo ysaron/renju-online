@@ -74,9 +74,13 @@ function addGameModeList(modes) {
             modeBlock.classList.add("mode-inactive");
             modeCheckbox.innerHTML = "&#10008;";
         }
+        if (mode.dev) {
+            modeBlock.classList.add("mode-dev");
+            modeCheckbox.innerHTML = "&#10008;";
+        }
 
         let modeTooltip = createRulesTooltip(
-            mode.time_limit, mode.board_size, mode.classic_mode, mode.with_myself, mode.three_players
+            mode.time_limit, mode.board_size, mode.classic_mode, mode.with_myself, mode.three_players, mode.dev
         );
         modeTooltip.classList.add("tooltip");
 
@@ -123,6 +127,7 @@ function updateCurrentRules(rules) {
 
 function addMode(event) {
     mode = event.target.closest(".mode-block");
+    if (mode.classList.contains("mode-inactive") || mode.classList.contains("mode-dev")) return;
     const checkBox = mode.getElementsByClassName("mode-checkbox")[0];
     if (mode.classList.contains("mode-set")) {
         mode.classList.remove("mode-set");

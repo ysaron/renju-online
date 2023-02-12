@@ -566,7 +566,8 @@ div.icon-wrapper {
     border: 1px solid var(--dark);
     border-radius: 10px;
     color: var(--dark);
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: white;
+    opacity: 0.7;
     margin: 5px;
     display: flex;
     position: relative;
@@ -574,11 +575,22 @@ div.icon-wrapper {
     user-select: none;
 }
 .mode-set {
-    background-color: rgba(0, 204, 0, 0.3);
+    background-color: var(--green);
+    box-shadow: 0 0 5px 2px var(--green);
+    color: white;
+    border-color: var(--green);
+    opacity: 1;
+    transition: 0.2s;
 }
 .mode-inactive {
-    background-color: rgba(204, 0, 0, 0.3);
-    pointer-events: none;
+    background-color: var(--red);
+}
+.mode-dev {
+    background-color: var(--grey);
+}
+.mode-block:hover {
+    opacity: 1;
+    transition: 0.2s;
 }
 .mode-block .mode-name {
     flex-basis: 75%;
@@ -592,6 +604,7 @@ div.icon-wrapper {
     text-align: center;
     line-height: 50px;
 }
+.mode-set .mode-checkbox {border-left: 1px solid var(--green);}
 .tooltip {
     position: absolute;
     z-index: 1;

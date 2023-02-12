@@ -31,13 +31,13 @@ class GameRules(BaseModel):
 
 class GameModeSchema(GameModeBaseSchema):
     id: int
-
     time_limit: int | None = Field(None, ge=0, le=1200, description='Время, отведенное игрокам на ходы (с)')
     board_size: int | None = Field(None, gt=10, le=40, description='Длина стороны квадратного поля (в клетках)')
     classic_mode: bool | None = Field(None, description='Включить классические правила рэндзю')
     with_myself: bool | None = Field(None, description='Игра с самим собой')
     three_players: bool | None = Field(None, description='Три игрока (каждый против каждого)')
     is_active: bool = Field(False, description='Доступен ли мод для игры')
+    dev: bool = Field(False, description='Находится ли мод в разработке')
 
 
 class GameModeInGameSchema(GameModeBaseSchema):

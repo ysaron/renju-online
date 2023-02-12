@@ -168,7 +168,10 @@ class GameService:
     async def get_modes(self, mode_ids: list[int] | None = None) -> list[GameMode]:
         stmt = select(GameMode)
         if mode_ids is not None:
-            stmt = stmt.where(GameMode.id.in_(mode_ids))
+            stmt = stmt.where(and_(
+                GameMode.id.in_(mode_ids),
+                ~GameMode.dev,
+            ))
         modes = await self.__db.scalars(stmt)
         return modes.all()
 

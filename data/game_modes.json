@@ -1,30 +1,26 @@
 [
   {
     "id": 1,
-    "name": "Timeless",
-    "is_active": true,
-    "time_limit": 0
+    "name": "Rapid",
+    "is_active": false,
+    "time_limit": 600,
+    "dev": false
   },
   {
     "id": 2,
-    "name": "Rapid",
-    "is_active": false,
-    "time_limit": 600
+    "name": "Standalone",
+    "is_active": true,
+    "with_myself": true,
+    "dev": true
   },
   {
     "id": 3,
-    "name": "Standalone",
-    "is_active": true,
-    "with_myself": true
-  },
-  {
-    "id": 4,
     "name": "Big Board",
     "is_active": true,
     "board_size": 30
   },
   {
-    "id": 5,
+    "id": 4,
     "name": "Trinity",
     "is_active": true,
     "three_players": true,

@@ -155,7 +155,7 @@ function screenMainLoggedHide() {
     screenMainLogged.style.display = "none"
 }
 
-function createRulesTooltip(time_limit, board_size, classic_mode, with_myself, three_players) {
+function createRulesTooltip(time_limit, board_size, classic_mode, with_myself, three_players, dev) {
     const tooltip = document.createElement("div");
 
     if (time_limit != null) {
@@ -186,6 +186,11 @@ function createRulesTooltip(time_limit, board_size, classic_mode, with_myself, t
     if (three_players) {
         let p = document.createElement("p");
         p.innerHTML = "3 players";
+        tooltip.appendChild(p);
+    }
+    if (dev) {
+        let p = document.createElement("p");
+        p.innerHTML = "[IN DEVELOPMENT]";
         tooltip.appendChild(p);
     }
     return tooltip

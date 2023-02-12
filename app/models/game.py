@@ -94,6 +94,7 @@ class GameMode(Base):
     with_myself = Column(Boolean, default=None)
     three_players = Column(Boolean, default=None)
     is_active = Column(Boolean, default=False)
+    dev = Column(Boolean, default=False)
 
     # m2m (Game)
     games = relationship('Game', secondary=game_mode_m2m, back_populates='modes', lazy='selectin')
