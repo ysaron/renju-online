@@ -315,9 +315,10 @@ function gameFinished(game, verboseResult, winningCellsCoords) {
     hideActiveGameMarker();
     renderPlayers(game);
     highlightWinningCells(winningCellsCoords);
-    alert(`The game has been finished. ${verboseResult} --- ${winningCellsCoords}`);
+    alert(`The game has been finished. ${verboseResult}`);
     console.log("FORGET GAME gameFinished");
     console.log(winningCellsCoords);
+    btnLeave.classList.remove("btn-concede");
     forgetGame(game.id);
     showMainScreen();
 }
