@@ -167,24 +167,35 @@ function addGameInList(game) {
     gameList.insertBefore(gameItem, gameList.firstChild);
 }
 
+function createIndicatorTooltip(player) {
+    let tooltip = document.createElement("div");
+    tooltip.classList.add("tooltip", "tooltip-autowidth");
+    tooltip.innerHTML = player.player.name;
+    return tooltip
+}
+
 function lightUpPlayerIndicators(game, indicatorBlock) {
     for (indicator of indicatorBlock.children) {
         indicator.classList.add("indicator-empty");
+        indicator.innerHTML = "";
     }
     if (game.player_1) {
         indicatorBlock.children[0].classList.remove("indicator-empty");
         let cls = game.player_1.result.result == 2 ? "indicator-red" : "indicator-green";
         indicatorBlock.children[0].classList.add(cls);
+        indicatorBlock.children[0].appendChild(createIndicatorTooltip(game.player_1));
     }
     if (game.player_2) {
         indicatorBlock.children[1].classList.remove("indicator-empty");
         let cls = game.player_2.result.result == 2 ? "indicator-red" : "indicator-green";
         indicatorBlock.children[1].classList.add(cls);
+        indicatorBlock.children[1].appendChild(createIndicatorTooltip(game.player_2));
     }
     if (game.player_3) {
         indicatorBlock.children[2].classList.remove("indicator-empty");
         let cls = game.player_3.result.result == 2 ? "indicator-red" : "indicator-green";
         indicatorBlock.children[2].classList.add(cls);
+        indicatorBlock.children[2].appendChild(createIndicatorTooltip(game.player_3));
     }
 }
 
