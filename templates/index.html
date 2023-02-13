@@ -27,16 +27,15 @@
       <div class="online-counter">unknown</div>
     </div>
     <div id="mainscreen-not-logged" class="screen screen-main">
-      <div class=""><h1>Renju v1.0</h1></div>
+      {% include "home.html" %}
       <div class="section">
         <button type="button" class="btn btn-large login">Login</button>
         <button type="button" class="btn btn-large signup">Signup</button>
       </div>
     </div>
     <div id="mainscreen-logged" class="screen screen-main">
-      <div class=""><h1>Renju v1.0</h1></div>
+      {% include "home.html" %}
       <div class="section">
-        <button type="button" class="btn btn-large">Hi, <span class="span-username"></span>!</button>
         <button type="button" class="btn btn-large logout">Logout</button>
       </div>
       <div class="section">

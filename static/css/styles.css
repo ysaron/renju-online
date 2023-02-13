@@ -22,12 +22,6 @@ body {
     /*position: fixed;*/
 }
 
-h1 {
-    text-align: center;
-    font-size: 80px;
-    text-shadow: -2px -2px 5px rgba(0, 0, 0, 0.5);
-}
-
 h2 {
     text-align: center;
     font-weight: bolder;
@@ -81,6 +75,20 @@ input[type=text], input[type=password], input[type=email] {
 input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
     outline: 2px solid white;
     background-color: white;
+}
+
+a:link, a:visited {
+    color: var(--dark);
+    background-color: transparent;
+}
+a:hover, a:active {
+    color: var(--blue);
+}
+
+.main-heading {
+    text-align: center;
+    font-size: 100px;
+    text-shadow: -2px -2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .container {
