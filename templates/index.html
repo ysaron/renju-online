@@ -42,7 +42,7 @@
       <div class="section">
         <button type="button" class="btn btn-large btn-create-game">Create</button>
         <button type="button" class="btn btn-large btn-join-game">Join</button>
-        <button type="button" class="btn btn-large btn-my-stats">Statistics
+        <button type="button" class="btn btn-large btn-my-stats btn-inactive">Statistics
            <span class="question"><b>?</b><span class="tooltip tooltip-common">In development</span></span>
         </button>
       </div>
@@ -115,7 +115,10 @@
     <div id="game-screen" class="screen screen-game">
       <div class="section section-top">
         {% include "home_button.html" %}
-        <div id="game-id-block"></div>
+        <div id="game-id-block">
+          <label for="current-game-id-field">Game ID: </label>
+          <input type="text" name="current_game_id" id="current-game-id-field" readonly>
+        </div>
         <div id="ready-block">
           <div id="game-participate-mode" style="display: none;">Spectator Mode</div>
           <button type="button" class="btn btn-large btn-ready" id="btn-ready">Ready!</button>
@@ -140,8 +143,7 @@
         </div>
       </div>
       <div class="section">
-        <div id="time-panel" class="time-panel">
-
+        <div id="left-panel" class="left-panel">
         </div>
         <div id="board-wrapper" class="board-wrapper">
           <div id="board" class="board" style="background: no-repeat center/300% url({{ url_for('static', path='/images/board_wood.png') }})"></div>

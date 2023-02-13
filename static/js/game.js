@@ -1,11 +1,11 @@
-const timePanel = document.getElementById("time-panel")
+const leftPanel = document.getElementById("left-panel")
 const movesPanel = document.getElementById("moves-panel")
 const boardWrapper = document.getElementById("board-wrapper")
 const boardBlock = document.getElementById("board")
 const xAxis = document.getElementById("x-axis")
 const yAxis = document.getElementById("y-axis")
 const gamePlayersSection = document.getElementById("game-players-section")
-const gameIdBlock = document.getElementById("game-id-block")
+const gameIdBlockField = document.getElementById("current-game-id-field")
 const readyBlock = document.getElementById("ready-block")
 const gameParticipateMode = document.getElementById("game-participate-mode")
 const btnReady = document.getElementById("btn-ready")
@@ -126,7 +126,7 @@ function clearBoard() {
 }
 
 function renderGameInfo(game) {
-    gameIdBlock.innerHTML = `Game ID: ${game.id}`;
+    gameIdBlockField.value = game.id;
 }
 
 function showPlayersSection(game) {

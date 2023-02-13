@@ -278,6 +278,7 @@ button {
 
 .btn-inactive {
     background-color: var(--grey);
+    cursor: default;
 }
 
 div.icon-wrapper {
@@ -334,6 +335,8 @@ div.icon-wrapper {
 }
 .player-active {
     background-color: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 5px 2px var(--green);
     color: white;
     cursor: pointer;
 }
@@ -349,6 +352,13 @@ div.icon-wrapper {
 }
 #game-players-section {
     visibility: hidden;
+}
+#game-id-block {
+    height: 50px;
+    line-height: 50px;
+}
+#current-game-id {
+    width: 200px;
 }
 .chip {
     border-radius: 50%;
@@ -373,10 +383,13 @@ div.icon-wrapper {
     background-color: var(--grey);
 }
 
-.time-panel {
+.left-panel {
     width: 13%;
     border-radius: 10px;
     background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .moves-panel {
     width: 13%;
