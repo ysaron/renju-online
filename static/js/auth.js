@@ -170,7 +170,7 @@ function getMe(token) {
 
 function requestVerification(user_email) {
     // запрашивает отправку токена верификации емейла на этот емейл
-
+    showLoader();
     let data = {email: user_email};
     fetch(`${origin}/auth/request-verify-token`, {
         method: "POST",
@@ -190,6 +190,9 @@ function requestVerification(user_email) {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function sendFormRequestVerification() {
@@ -206,7 +209,7 @@ function sendFormRequestVerification() {
 
 function sendFormSignup(event) {
     // отправляет на сервер данные с формы регистрации
-
+    showLoader();
     event.preventDefault()
     let data = {}
     let formData = new FormData(this)
@@ -239,11 +242,14 @@ function sendFormSignup(event) {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function sendFormVerify(event) {
     // отправляет на сервер токен верификации емейла
-
+    showLoader();
     event.preventDefault()
     let data = {}
     let formData = new FormData(this)
@@ -271,11 +277,15 @@ function sendFormVerify(event) {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function sendFormLogin(event) {
     // отправляет на сервер данные для аутентификации юзера как multipart/form-data
 
+    showLoader();
     event.preventDefault()
     let data = {}
     let form = new FormData(this)
@@ -316,11 +326,14 @@ function sendFormLogin(event) {
                 showRequestVerification();
             }
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function sendFormForgotPassword(event) {
     // отправляет на сервер емейл, для которого запрашивается смена пароля
-
+    showLoader();
     event.preventDefault()
     let data = {}
     let formData = new FormData(this)
@@ -348,11 +361,14 @@ function sendFormForgotPassword(event) {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function sendFormResetPassword(event) {
     // отправляет на сервер новый пароль юзера и верифицирующий токен
-
+    showLoader();
     event.preventDefault()
     let data = {}
     let formData = new FormData(this)
@@ -381,6 +397,9 @@ function sendFormResetPassword(event) {
             let info = getErrorInfo(response);
             alert(info);
         }))
+        .finally(() => {
+            hideLoader();
+        })
 }
 
 function logout() {

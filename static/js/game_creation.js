@@ -1,9 +1,6 @@
 const modeList = document.getElementById("mode-list")
 const ruleList = document.getElementById("rule-list")
 
-const modesLoader = makeLoaderGrid("modes-loader")
-const rulesLoader = makeLoaderGrid("rules-loader")
-
 for (let btn of btnsCreateGame) {btn.addEventListener("click", startGameCreation)}
 
 formCreateGame.addEventListener("submit", sendFormCreateGame)
@@ -14,11 +11,8 @@ function showScreenGameCreation() {
 }
 
 function startGameCreation() {
+    showLoader();
     showScreenGameCreation();
-    modeList.appendChild(modesLoader);
-    modesLoader.style.display = "inline-block";
-    ruleList.appendChild(rulesLoader);
-    rulesLoader.style.display = "inline-block";
     let token = getToken();
     fetch(`${origin}/modes`, {
         method: "GET",
@@ -38,18 +32,14 @@ function startGameCreation() {
         .then(response => {
             // response = {modes: array, rules: obj}
             addGameModeList(response.modes);
-            modesLoader.style.display = "none";
-
             updateCurrentRules(response.rules);
-            rulesLoader.style.display = "none";
         })
         .catch(response => response.json().then(response => {
             let info = getErrorInfo(response);
             alert(info);
         }))
         .finally(() => {
-            modesLoader.style.display = "none";
-            rulesLoader.style.display = "none";
+            hideLoader();
         })
 }
 

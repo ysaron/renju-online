@@ -16,6 +16,7 @@ const modalForgotPassword = document.getElementById("modal-forgot-password")
 const modalResetPassword = document.getElementById("modal-reset-password")
 const modalVerify = document.getElementById("modal-verify")
 const modalNotification = document.getElementById("modal-notification")
+const modalLoader = document.getElementById("modal-loader")
 
 const btnLogout = document.querySelector(".logout")
 const spanUsername = document.querySelector(".span-username")
@@ -52,6 +53,28 @@ const playerRoles = ["1", "2", "3"];
 const spectatorRoles = ["4"];
 
 let ws;
+
+function makeLoaderGrid(id) {
+    let grid = document.createElement("div");
+    grid.classList.add("lds-grid");
+    for (let i=0; i<9; i++) {
+        let elem = document.createElement("div");
+        grid.appendChild(elem);
+    }
+    grid.id = id;
+    return grid
+}
+
+let modalLoaderGrid = makeLoaderGrid("modal-loader");
+modalLoader.appendChild(modalLoaderGrid);
+
+function showLoader() {
+    modalLoader.style.display = "flex";
+}
+
+function hideLoader() {
+    modalLoader.style.display = "none";
+}
 
 function showMainScreen() {
     hideAllScreens();
@@ -207,17 +230,6 @@ function getGameStateColor(state) {
         default:
             return "black"
     }
-}
-
-function makeLoaderGrid(id) {
-    let grid = document.createElement("div");
-    grid.classList.add("lds-grid");
-    for (let i=0; i<9; i++) {
-        let elem = document.createElement("div");
-        grid.appendChild(elem);
-    }
-    grid.id = id;
-    return grid
 }
 
 function openWS() {

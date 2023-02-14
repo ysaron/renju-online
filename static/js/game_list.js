@@ -1,5 +1,4 @@
 const gameList = document.getElementById("game-list")
-const gameListLoader = makeLoaderGrid("gamelist-loader")
 const privateGameInput = document.getElementById("private-game-id")
 const joinPrivateGameBtn = document.getElementById("join-private-game")
 const spectatePrivateGameBtn = document.getElementById("spectate-private-game")
@@ -28,8 +27,7 @@ function clearGameList() {
 function updateGameList() {
     let token = getToken();
     clearGameList();
-    gameList.appendChild(gameListLoader);
-    gameListLoader.style.display = "inline-block";
+    showLoader();
     fetch(`${origin}/games`, {
         method: "GET",
         mode: "cors",
@@ -46,7 +44,6 @@ function updateGameList() {
             return Promise.reject(response);
         })
         .then(response => {
-            gameListLoader.style.display = "none";
             fillGameList(response);
         })
         .catch(response => response.json().then(response => {
@@ -54,7 +51,7 @@ function updateGameList() {
             alert(info);
         }))
         .finally(() => {
-            gameListLoader.style.display = "none";
+            hideLoader();
         })
 }
 

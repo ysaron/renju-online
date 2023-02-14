@@ -722,6 +722,12 @@ div.icon-wrapper {
 
 }
 
+.modal-loader {
+    display: none;
+    justify-content: center;
+    z-index: 2;
+}
+
 .auth {
     width: 320px;
 }
@@ -825,7 +831,7 @@ div.icon-wrapper {
 /* ----------------------------------------------------------------------------------------- */
 
 .lds-grid {
-  display: none;
+  /*display: none;*/
   position: relative;
   align-self: center;
   width: 200px;
