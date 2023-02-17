@@ -113,7 +113,7 @@
     </div>
     <div id="game-screen" class="screen screen-game">
       <div class="section section-top">
-        {% include "home_button.html" %}
+        {% if debug %}{% include "home_button.html" %}{% endif %}
         <div id="game-id-block">
           <label for="current-game-id-field">Game ID: </label>
           <input type="text" name="current_game_id" id="current-game-id-field" readonly>

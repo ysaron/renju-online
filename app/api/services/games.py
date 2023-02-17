@@ -250,7 +250,7 @@ class GameService:
     @staticmethod
     async def get_user_games(
             user: User,
-            scope: Literal['nonstarted', 'active', 'finished', 'all'] = 'all',
+            scope: Literal['nonstarted', 'active', 'finished', 'unfinished', 'all'] = 'all',
     ) -> list[Game]:
         match scope:
             case 'nonstarted':
@@ -259,6 +259,9 @@ class GameService:
                 return [pr.game for pr in user.games if pr.ready and pr.result.result is None]
             case 'finished':
                 return [pr.game for pr in user.games if pr.game.state == GameStateEnum.finished]
+            case 'unfinished':
+                return [pr.game for pr in user.games
+                        if pr.result.result is None and pr.game.state != GameStateEnum.finished]
             case _:
                 return [pr.game for pr in user.games]
 
@@ -504,7 +507,7 @@ class GameService:
         # иначе игра продолжается
         return MoveMetaWrapper(move=move, game=await self.switch_turn_order(game))
 
-    async def leave(self, player: User, game_id: uuid.UUID) -> GameMetaWrapper:
+    async def leave(self, player: User, game_id: uuid.UUID, disconnected: bool = False) -> GameMetaWrapper:
         if (game := await self.get_game(game_id)) is None:
             raise exceptions.NoGameFound()
         if not await self.__check_user_in_game(user=player, game=game):
@@ -514,7 +517,7 @@ class GameService:
         if pr.role not in pr_enums:
             raise exceptions.NotAPlayer()
         if pr.ready:
-            return await self.__player_concede(pr, game)
+            return await self.__player_concede(pr, game, disconnected)
         else:
             return await self.__player_leave(pr, game)
 
@@ -534,13 +537,14 @@ class GameService:
             return GameMetaWrapper(game=game, delete=True)
         return GameMetaWrapper(game=game)
 
-    async def __player_concede(self, pr: PlayerRole, game: Game) -> GameMetaWrapper:
+    async def __player_concede(self, pr: PlayerRole, game: Game, disconnected: bool = False) -> GameMetaWrapper:
         players = await self.__get_players(game)
         if len(players) == 1:
             return GameMetaWrapper(game=game, delete=True)
 
+        defeat_reason = PlayerResultReasonEnum.disconnect if disconnected else PlayerResultReasonEnum.concede
         game = await self.__set_players_result(players=[pr], game=game, result=PlayerResultEnum.lose,
-                                               reason=PlayerResultReasonEnum.concede)
+                                               reason=defeat_reason)
         active_players = await self.__get_players(game, only_active=True)
         num_active_players = len(active_players)
         if num_active_players > 1:

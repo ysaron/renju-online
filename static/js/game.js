@@ -37,6 +37,7 @@ function openGame(game, my_role) {
     renderPlayers(game);
     renderControls(game, my_role);
     console.log("OpenGame ", currentBoards);
+    hideLoader();
 }
 
 function playerJoined(game, playerName) {

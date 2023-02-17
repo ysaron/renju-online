@@ -15,5 +15,6 @@ async def home(request: Request) -> Jinja2Templates.TemplateResponse:
         'app_host': config.APP_HOST,
         'remote_host': config.REMOTE_HOST,
         'app_port': config.APP_PORT,
+        'debug': config.DEBUG,
     }
     return template.TemplateResponse('index.html', context=context)

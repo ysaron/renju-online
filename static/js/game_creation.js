@@ -165,6 +165,7 @@ function getChosenModes() {
 }
 
 function sendFormCreateGame(event) {
+    showLoader();
     event.preventDefault();
     modes = getChosenModes();
     let data = {action: "create_game"};

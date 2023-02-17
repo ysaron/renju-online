@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, Depends, WebSocket, Query
 from pydantic import ValidationError
 
+from app.config import config
 from app.core import exceptions
 from app.core.db.deps import AsyncSession, get_async_session
 from app.core.ws.base import WebSocketActions
@@ -246,6 +247,50 @@ class RenjuWSEndpoint(WebSocketActions):
         except Exception as e:
             # Мб разблокировать снова борду для этого юзера? Он же не сделал ход, по идее.
             # Или мог?
+            raise e
+
+    async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:
+        await super().on_disconnect(connection, close_code)
+        if config.DEBUG:
+            return
+        try:
+            async with async_session_context() as db:
+                user = await UserService(db).get_user_by_id(connection.user_id)
+                game_service = GameService(db)
+                active_games = await game_service.get_user_games(user, scope='unfinished')
+                for game in active_games:
+                    game_meta = await game_service.leave(player=user, game_id=game.id)
+                    user_ids = [pr.player.id for pr in game_meta.game.players]
+                    game_schema = GameSchemaOut.from_orm(game_meta.game)
+                    if game_meta.delete:
+                        await game_service.remove_game(game_meta.game)
+                        # удаляем игру из GameList - для всех
+                        await self.manager.broadcast(message.GameRemovedListMessage(game_id=game.id))
+                        # выкидываем в главное меню - для участников
+                        await self.manager.limited_broadcast(
+                            user_ids=user_ids,
+                            message=message.GameRemovedMessage(game_id=game.id),
+                        )
+                        return
+
+                    # для всех: отразить изменения в GameList (красный либо пустой индикатор)
+                    await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
+                    # для участников: отразить изменения в playerBlock (красный либо пустой блок, зависит от результата)
+                    await self.manager.limited_broadcast(
+                        user_ids=user_ids,
+                        message=message.UpdateGameMessage(game=game_schema),
+                    )
+
+                    if game_meta.game.state == GameStateEnum.finished:
+                        # отображаем результат участникам
+                        verbose_result = game_schema.verbose_result()
+                        await self.manager.limited_broadcast(
+                            user_ids=user_ids,
+                            message=message.GameFinishedMessage(game=game_schema, result=verbose_result),
+                        )
+        except exceptions.NotAPlayer:
+            pass
+        except Exception as e:
             raise e
 
 
