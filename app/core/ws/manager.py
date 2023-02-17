@@ -5,6 +5,8 @@ from typing import Any
 from fastapi import WebSocket
 from fastapi.encoders import jsonable_encoder
 
+from app.config import config
+
 
 @dataclass(frozen=True)
 class WSConnection:
@@ -30,11 +32,14 @@ class ConnectionManager:
         self.active_connections: WSConnectionList = WSConnectionList()
 
     async def connect(self, connection: WSConnection) -> None:
+        if not config.DEBUG and self.active_connections.get_websocket(connection.user_id):
+            await self.send_message(connection.websocket, {'action': 'already_connected'})
+            return
         self.active_connections.all.append(connection)
 
     def disconnect(self, connection: WSConnection) -> None:
-        # добавить возможность дисконнектить по одному user_id или вебсокету
-        self.active_connections.all.remove(connection)
+        if connection in self.active_connections.all:
+            self.active_connections.all.remove(connection)
 
     def get_ws(self, user_id: UUID) -> WebSocket:
         ws = self.active_connections.get_websocket(user_id)

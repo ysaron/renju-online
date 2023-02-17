@@ -7,6 +7,7 @@ const screenMainLogged = document.getElementById("mainscreen-logged")
 const screenGameCreation = document.getElementById("game-creation")
 const screenGameList = document.getElementById("game-list-screen")
 const screenGame = document.getElementById("game-screen")
+const screenAlreadyConnected = document.getElementById("already-connected-screen")
 const activeGameMarker = document.getElementById("active-game-marker")
 
 const modalSignup = document.getElementById("modal-signup")
@@ -249,6 +250,9 @@ function wsDispatcher() {
         let data = JSON.parse(event.data);
         console.log("data.action", data.action);
         switch (data.action) {
+            case "already_connected":
+                showAlreadyConnectedScreen();
+                ws.close(1000, "Already connected");
             case "online_counter":
                 updateTotalOnline(data.total);
                 break;
@@ -379,4 +383,9 @@ function unblockButton(btn) {
 function forgetGame(game_id) {
     console.log("DELETE ", game_id);
     delete currentBoards[game_id];
+}
+
+function showAlreadyConnectedScreen() {
+    hideAllScreens();
+    screenAlreadyConnected.style.display = "flex";
 }
