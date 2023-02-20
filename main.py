@@ -55,4 +55,4 @@ async def create_game_modes():
 
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', host=config.APP_HOST, port=config.APP_PORT, reload=True)
+    uvicorn.run('main:app', host=config.APP_HOST, port=config.APP_PORT)

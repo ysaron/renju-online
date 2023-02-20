@@ -1,0 +1,41 @@
+FROM python:3.10 as builder
+
+# не записывать .pyc-файлы при импорте исходных модулей
+ENV PYTHONDONTWRITEBYTECODE 1
+# отключение буферизации потоков stdout и stderr
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /usr/src/app/
+
+RUN apt update \
+    && apt upgrade -y \
+    && apt install postgresql gcc python3-dev musl-dev -y \
+    && pip install --upgrade pip
+
+COPY ./req.txt .
+
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r req.txt
+
+# --------------------------------------------------------------------------------------------
+
+FROM python:3.10
+
+WORKDIR /usr/src/app/
+
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/req.txt .
+RUN pip install --no-cache /wheels/*
+
+RUN adduser --system --group renju \
+    && usermod -aG www-data renju \
+    && usermod -aG sudo renju
+
+COPY docker/backend/entrypoint.sh .
+
+COPY . .
+
+RUN chown -R renju:renju /usr/src/app
+
+USER renju
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

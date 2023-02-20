@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for_port(request, 'static', path='/css/styles.css') }}">
     <title>Renju</title>
 </head>
 <body>
@@ -144,7 +144,7 @@
       <div class="section">
         <div id="left-panel" class="left-panel">
         </div>
-        <div id="board-wrapper" class="board-wrapper" style="background: no-repeat center/300% url({{ url_for('static', path='/images/board_wood_v2.png') }})">
+        <div id="board-wrapper" class="board-wrapper" style="background: no-repeat center/300% url({{ url_for_port(request, 'static', path='/images/board_wood_v2.png') }})">
           <div id="board" class="board"></div>
           <div id="y-axis" class="axis"></div>
           <div id="x-axis" class="axis"></div>
@@ -297,11 +297,11 @@
 </div>
 </template>
 
-<script src="{{ url_for('static', path='/js/main.js') }}"></script>
-<script src="{{ url_for('static', path='/js/auth.js') }}"></script>
-<script src="{{ url_for('static', path='/js/game_creation.js') }}"></script>
-<script src="{{ url_for('static', path='/js/game_list.js') }}"></script>
-<script src="{{ url_for('static', path='/js/game.js') }}"></script>
+<script src="{{ url_for_port(request, 'static', path='/js/main.js') }}"></script>
+<script src="{{ url_for_port(request, 'static', path='/js/auth.js') }}"></script>
+<script src="{{ url_for_port(request, 'static', path='/js/game_creation.js') }}"></script>
+<script src="{{ url_for_port(request, 'static', path='/js/game_list.js') }}"></script>
+<script src="{{ url_for_port(request, 'static', path='/js/game.js') }}"></script>
 
 </body>
 </html>

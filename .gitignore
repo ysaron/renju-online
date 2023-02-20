@@ -6,4 +6,4 @@ __pycache__/
 venv
 .env
 .env.dev
-prod.env
+.env.prod

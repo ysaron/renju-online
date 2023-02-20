@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.prod
+    command: python main.py
+    expose:
+      - "8080"
+    volumes:
+      - migrations_vol:/usr/src/app/migrations/versions/
+      - static_vol:/usr/src/app/static/
+    env_file:
+      - .env.prod
+    depends_on:
+      - db
+    restart: always
+  db:
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    volumes:
+      - pgdata_vol:/var/lib/postgresql/data/
+    env_file:
+      - .env.prod
+    restart: always
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file:
+      - .env.prod
+    volumes:
+      - pgadmin_vol:/var/lib/pgadmin
+    ports:
+      - "5051:80"
+    restart: unless-stopped
+    depends_on:
+      - db
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - static_vol:/usr/src/app/static/
+    depends_on:
+      - app
+    restart: always
+
+volumes:
+  migrations_vol:
+  pgdata_vol:
+  pgadmin_vol:
+  static_vol:
