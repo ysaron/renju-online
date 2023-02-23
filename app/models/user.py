@@ -3,7 +3,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import relationship
 
 from app.core.db.session import Base
-from .game import PlayerRole, Move, PlayerResult
+from .game import PlayerRole
 from .mixins import UuidIdMixin
 
 
@@ -18,5 +18,3 @@ class User(UuidIdMixin, Base):
 
     # One to Many
     games = relationship(PlayerRole, back_populates='player', lazy='selectin')
-    # moves = relationship(Move, back_populates='player', lazy='selectin')
-    # victories = relationship(GameResult, back_populates='winner')

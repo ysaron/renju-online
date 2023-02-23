@@ -62,31 +62,6 @@ function modalResetPasswordClose() {
     formResetPassword.reset();
 }
 
-function modalTopOpen() {
-    modalTop.style.display = "block"
-}
-
-function modalTopClose() {
-    modalTop.style.display = "none"
-}
-
-function modalMyStatOpen() {
-    modalMyStat.style.display = "block"
-//    send({action: "stat"})
-}
-
-function modalMyStatClose() {
-    modalMyStat.style.display = "none"
-}
-
-function showLogout() {
-    btnLogout.style.display = "block"
-}
-
-function hideLogout() {
-    btnLogout.style.display = "none"
-}
-
 function showRequestVerification() {
     btnRequestVerification.style.display = "block"
 }
@@ -95,30 +70,12 @@ function hideRequestVerification() {
     btnRequestVerification.style.display = "none"
 }
 
-function showLoginSignup() {
-    document.querySelector(".signup").style.display = "block"
-    document.querySelector(".login").style.display = "block"
-}
-
-function hideLoginSignup() {
-    document.querySelector(".signup").style.display = "none"
-    document.querySelector(".login").style.display = "none"
-}
-
 function showUsername(username) {
     spanUsername.innerHTML = username
 }
 
 function hideUsername() {
     spanUsername.innerHTML = ""
-}
-
-function showBtnMyStat() {
-    btnMyStat.style.display = "block"
-}
-
-function hideBtnMyStat() {
-    btnMyStat.style.display = "none"
 }
 
 window.onclick = function (event) {

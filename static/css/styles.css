@@ -19,7 +19,6 @@ body {
     color: var(--dark);
     font-size: 19px;
     line-height: 24px;
-    /*position: fixed;*/
 }
 
 h2 {
@@ -191,39 +190,6 @@ a:hover, a:active {
     width: 100%;
 }
 
-.item {
-    border-bottom-color: #333333;
-    border-bottom-style: solid;
-}
-
-.item-title {
-    grid-column: 2/4;
-    width: 100%;
-    border-bottom-color: #333333;
-    border-bottom-style: solid
-}
-
-.item-h4 {
-    text-align: center;
-    font-size: 26px;
-    margin: 27px 0 10px 0;
-}
-
-.game-list-title {
-    grid-column: 2/4;
-    width: 100%;
-    border-bottom-color: #333333;
-    border-bottom-style: solid
-}
-
-.game-on {
-    display: block;
-}
-
-.game-off {
-    display: none;
-}
-
 button {
     font-family: monospace;
     font-size: 19px;
@@ -372,7 +338,6 @@ div.icon-wrapper {
     border-radius: 50%;
     height: 95%;
     aspect-ratio: 1 / 1;
-    /*self-align: center;*/
 }
 .chip-icon {
     height: 70%;
@@ -543,7 +508,6 @@ div.icon-wrapper {
 .blue {color: var(--blue);}
 .datetime {font-style: italic;}
 
-
 .player-indicators {
     margin: 5px 0;
     display: flex;
@@ -685,12 +649,6 @@ div.icon-wrapper {
 
 /* ----------------------------------------------------------------------------------- */
 
-.users-online {
-    padding: 10px 10px;
-    text-align: center;
-    color: var(--green);
-}
-
 .modal {
     display: none;
     position: fixed;
@@ -782,8 +740,7 @@ div.icon-wrapper {
 }
 
 .logout {
-    /*display: none;*/
-    /*margin-bottom: 15px;*/
+
 }
 
 .request-verify {
@@ -799,35 +756,8 @@ div.icon-wrapper {
     margin-top: 16px;
 }
 
-.btn-myStat {
-    display: none;
-    width: 90px;
-    margin-top: 16px;
-}
-
 .modal-top, .modal-myStat {
     width: 520px;
-}
-
-.wrapper-top-title {
-    display: grid;
-    margin: 0 0 0 20px;
-    grid-template-columns: 60px 200px 60px 60px 60px;
-    grid-template-rows: 40px;
-}
-
-.wrapper-top {
-    display: grid;
-    margin: 0 0 0 20px;
-    grid-template-columns: 60px 200px 60px 60px 60px;
-    grid-template-rows: repeat(10, 40px);
-}
-
-.wrapper-myStat {
-    display: grid;
-    margin: 0 0 0 20px;
-    grid-template-columns: 60px 200px 60px 60px 60px;
-    grid-template-rows: repeat(2, 40px);
 }
 
 .column {
@@ -839,7 +769,6 @@ div.icon-wrapper {
 /* ----------------------------------------------------------------------------------------- */
 
 .lds-grid {
-  /*display: none;*/
   position: relative;
   align-self: center;
   width: 200px;

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import Depends, WebSocket, Query, Request, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.db.deps import AsyncSession, get_async_session
@@ -10,7 +10,7 @@ from .services import UserService
 
 
 class OAuth2PasswordBearerWS(OAuth2PasswordBearer):
-    """ Prevent calling ``oauth2_scheme`` dependency if connection by websocket """
+    """ Предотвращает вызов зависимости ``oauth2_scheme``, если подключение по вебсокету """
     async def __call__(self, request: Request = None):
         if not request:
             return None
@@ -26,12 +26,12 @@ def get_current_user_dependency(
         websocket_mode: bool = False,
 ):
     """
-    User dependency builder.
+    Сборщик FastAPI-зависимости пользователя
 
-    :param is_verified: if True, user must be verified
-    :param is_superuser: if True, user must be superuser
-    :param websocket_mode: if True, use WebSocket mode, else HTTP mode
-    :return: user dependency callable
+    :param is_verified: если True, пользователь должен быть верифицирован
+    :param is_superuser: если True, пользователь должен быть админом
+    :param websocket_mode: если True, использовать WebSocket-режим, иначе HTTP-режим
+    :return: FastAPI-зависимость пользователя (callable)
     """
 
     async def token_dependency(
@@ -47,14 +47,12 @@ def get_current_user_dependency(
             db: AsyncSession = Depends(get_async_session),
     ):
         """
-        HTTP mode: return authenticated user. If authentication failed, raise HTTPException.
-
-        WebSocket mode: return authenticated user. If authentication failed, return None.
+        Возвращает аутентифицированного пользователя, если аутентификация успешна
 
         :param token: JWT access token
         :param db: AsyncSession
-        :return: User ORM instance or None, if websocket=True and authentication failed
-        :raise HTTPException: if authentication failed
+        :return: ORM-объект User или None, если websocket_mode=True и аутентификация провалена
+        :raise HTTPException: если websocket_mode=False и аутентификация провалена
         """
 
         try:

@@ -12,8 +12,8 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 def validate_password(user_data: UserCreate) -> None:
     """
-    :raise PasswordTooShort: if password is shorter than 8 symbols
-    :raise PasswordInsecure: if password is too similar to email or username
+    :raise PasswordTooShort: если пароль короче 8 символов
+    :raise PasswordInsecure: если пароль слишком похож на имя или емейл
     """
 
     if len(user_data.password) < 8:

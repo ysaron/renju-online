@@ -127,7 +127,7 @@ class GameSchemaOut(GameSchema):
         schema.player_3 = instance.get_player_by_role(PlayerRoleEnum.third)
         schema.spectators = instance.get_spectators()
         schema.players = None
-        schema.board = [[int(cell) for cell in row] for row in schema.board.split('.')]     # дубл. Board.from_string()
+        schema.board = [[int(cell) for cell in row] for row in schema.board.split('.')]  # (!) дубл. Board.from_string()
         return schema
 
     def current_player(self) -> PlayerSchema | None:

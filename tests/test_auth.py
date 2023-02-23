@@ -39,13 +39,13 @@ class TestUserService:
         body = user_data['register']['good']
         await UserService(async_session).create_user(UserCreate(**body))
 
-        # проверка, что юзер был создан и создан корретно
+        # проверка, что пользователь был создан и создан корретно
         stmt = select(User).where(User.email == body['email'])
         result = await async_session.scalars(stmt)
         user = result.first()
         assert user.is_active
-        assert not user.is_verified, 'Юзер создался сразу же верифицированным'
-        assert not user.is_superuser, 'Юзер зарегистрировался как админ'
+        assert not user.is_verified, 'Пользователь создался сразу же верифицированным'
+        assert not user.is_superuser, 'Пользователь зарегистрировался как админ'
         assert user.name == body['name']
 
         # имитация отправки токена по email
@@ -57,18 +57,18 @@ class TestUserService:
             jwt_mock.assert_called_once()
             email_mock.assert_called_once()
 
-        # проверка, что юзер был верифицирован
+        # проверка, что пользователь был верифицирован
         await UserService(async_session).verify_user(token)
         await async_session.refresh(user)
         assert user.is_verified, 'Юзер не был верифицирован'
 
-        # проверка, что нельзя зарегистрироваться с данными существующего юзера
+        # проверка, что нельзя зарегистрироваться с данными существующего пользователя
         with pytest.raises(exceptions.UserAlreadyExists):
             await UserService(async_session).create_user(UserCreate(**body))
 
     @pytest.mark.anyio
     async def test_login(self, async_session: AsyncSession, user_data):
-        # создание юзера
+        # создание пользователя
         create_body = user_data['register']['good']
         user = await UserService(async_session).create_user(UserCreate(**create_body))
 
@@ -96,7 +96,7 @@ class TestUserService:
 
     @pytest.mark.anyio
     async def test_reset_password(self, async_session: AsyncSession, user_data):
-        # создание и верификация юзера
+        # создание и верификация пользователя
         create_body = user_data['register']['good']
         user = await UserService(async_session).create_user(UserCreate(**create_body))
         token = self.get_verification_token(user.id)

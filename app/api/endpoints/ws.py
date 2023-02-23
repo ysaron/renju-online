@@ -2,12 +2,12 @@ import uuid
 from typing import Any
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, WebSocket, Query
+from fastapi import APIRouter, Depends, WebSocket
 from pydantic import ValidationError
 
 from app.config import config
 from app.core import exceptions
-from app.core.db.deps import AsyncSession, get_async_session
+from app.core.db.deps import get_async_session
 from app.core.ws.base import WebSocketActions
 from app.core.ws.manager import WSConnection
 from app.api.services.games import GameService
@@ -35,6 +35,7 @@ class RenjuWSEndpoint(WebSocketActions):
                 user = await UserService(db).get_user_by_id(connection.user_id)
                 game_meta = await GameService(db).create_game(creator=user, game_data=game_input_data)
                 game_schema = GameSchemaOut.from_orm(game_meta.game)
+
                 # открытие созданной игры
                 await self.manager.send_message(
                     websocket=connection.websocket,
@@ -43,6 +44,7 @@ class RenjuWSEndpoint(WebSocketActions):
                         my_role=PlayerRoleEnum.first,
                     ),
                 )
+
                 # уведомление всех и вся о создании игры
                 if all([
                     not game_schema.is_private,
@@ -67,6 +69,7 @@ class RenjuWSEndpoint(WebSocketActions):
                 user = await UserService(db).get_user_by_id(connection.user_id)
                 game_meta = await GameService(db).join_game(player=user, game_id=game_input_data.id)
                 game_schema = GameSchemaOut.from_orm(game_meta.game)
+
                 # открытие игры присоединившимся игроком
                 await self.manager.send_message(
                     websocket=connection.websocket,
@@ -79,7 +82,7 @@ class RenjuWSEndpoint(WebSocketActions):
                     # Игра открывается заново уже участвующим игроком, уведомлять всех не нужно
                     return
 
-                # limited broadcast для игроков и зрителей игры
+                # уведомление игроков и зрителей игры для обновления экрана игры
                 await self.manager.limited_broadcast(
                     user_ids=[pr.player.id for pr in game_meta.game.players],
                     message=message.PlayerJoinedMessage(
@@ -88,6 +91,7 @@ class RenjuWSEndpoint(WebSocketActions):
                         player_role=game_meta.current_role,
                     ),
                 )
+
                 # уведомление всех и вся для обновления списка игр
                 await self.manager.broadcast(message.PlayerJoinedListMessage(
                     game=game_schema,
@@ -114,7 +118,7 @@ class RenjuWSEndpoint(WebSocketActions):
                 websocket=connection.websocket,
                 message=message.ErrorMessage(detail=f'Unable to join the game. Please, try again later.'),
             )
-            raise e     # log
+            raise e     # TODO: log
 
     async def ready(self, connection: WSConnection, data: Any) -> None:
         try:
@@ -133,7 +137,7 @@ class RenjuWSEndpoint(WebSocketActions):
                         player_role=game_meta.current_role,
                     ),
                 )
-                # --- попытка начать игру
+                # попытка начать игру
                 game = await GameService(db).attempt_to_start_game(game_meta.game)
                 if not game:
                     return
@@ -142,13 +146,16 @@ class RenjuWSEndpoint(WebSocketActions):
                 current_player = game_schema.current_player()
                 if not current_player:
                     raise ValueError('Cannot determine current player')
-                # для игроков и зрителей: игра началась - отразить на экране игры
+
+                # для игроков и зрителей: игра началась --> отразить на экране игры
                 await self.manager.limited_broadcast(
                     user_ids=[pr.player.id for pr in game.players],
                     message=message.GameStartedMessage(game=game_schema),
                 )
-                # для всех: игра началась - отразить в GameList
+
+                # для всех: игра началась - отразить в списке игр
                 await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
+
                 # для текущего игрока: разблокировать доску
                 await self.manager.send_message(
                     websocket=self.manager.active_connections.get_websocket(user_id=current_player.player.id),
@@ -157,10 +164,10 @@ class RenjuWSEndpoint(WebSocketActions):
         except (exceptions.UnsuitableGameState, exceptions.NotAPlayer):
             pass
         except (ValidationError, ValueError, exceptions.NoGameFound, exceptions.NotInGame) as e:
-            # уведомляем об ошибке, выписываем игрока из игры без простановки поражения
+            # TODO: уведомляем об ошибке, выписываем игрока из игры без простановки поражения
             raise e
         except Exception as e:
-            # log
+            # TODO: log
             raise e
 
     async def leave(self, connection: WSConnection, data: Any) -> None:
@@ -170,7 +177,6 @@ class RenjuWSEndpoint(WebSocketActions):
                 user = await UserService(db).get_user_by_id(connection.user_id)
                 game_meta = await GameService(db).leave(player=user, game_id=game_input_data.id)
                 user_ids = [pr.player.id for pr in game_meta.game.players]
-
                 game_schema = GameSchemaOut.from_orm(game_meta.game)
 
                 # вернуть на главный экран вышедшего игрока
@@ -181,25 +187,25 @@ class RenjuWSEndpoint(WebSocketActions):
 
                 if game_meta.delete:
                     await GameService(db).remove_game(game_meta.game)
-                    # удаляем игру из GameList - для всех
+                    # для всех: убрать игру из GameList
                     await self.manager.broadcast(message.GameRemovedListMessage(game_id=game_input_data.id))
-                    # выкидываем в главное меню - для участников
+                    # для участников: выход в главное меню
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
                         message=message.GameRemovedMessage(game_id=game_input_data.id),
                     )
                     return
 
-                # для всех: отразить изменения в GameList (красный либо пустой индикатор)
+                # для всех: отразить изменения в списке игр (красный либо пустой индикатор)
                 await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
-                # для участников: отразить изменения в playerBlock (красный либо пустой блок, зависит от результата)
+                # для участников: отразить изменения на экране игры
                 await self.manager.limited_broadcast(
                     user_ids=user_ids,
                     message=message.UpdateGameMessage(game=game_schema),
                 )
 
                 if game_meta.game.state == GameStateEnum.finished:
-                    # отображаем результат участникам
+                    # для участников: отобразить результат
                     verbose_result = game_schema.verbose_result()
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
@@ -209,7 +215,7 @@ class RenjuWSEndpoint(WebSocketActions):
         except exceptions.NotAPlayer:
             pass
         except Exception as e:
-            raise e
+            raise e     # TODO: log
 
     async def move(self, connection: WSConnection, data: Any) -> None:
         try:
@@ -226,7 +232,6 @@ class RenjuWSEndpoint(WebSocketActions):
                 )
                 if move_meta.game.state == GameStateEnum.pending:
                     current_player = game_schema.current_player()
-                    print(f'{current_player.role = }')
                     await self.manager.send_message(
                         websocket=self.manager.active_connections.get_websocket(user_id=current_player.player.id),
                         message=message.UnblockBoardMessage(game=game_schema),
@@ -245,8 +250,7 @@ class RenjuWSEndpoint(WebSocketActions):
         except exceptions.FalseClick:
             pass
         except Exception as e:
-            # Мб разблокировать снова борду для этого юзера? Он же не сделал ход, по идее.
-            # Или мог?
+            # TODO: log
             raise e
 
     async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:
@@ -264,25 +268,25 @@ class RenjuWSEndpoint(WebSocketActions):
                     game_schema = GameSchemaOut.from_orm(game_meta.game)
                     if game_meta.delete:
                         await game_service.remove_game(game_meta.game)
-                        # удаляем игру из GameList - для всех
+                        # для всех: убрать игру из списка игр
                         await self.manager.broadcast(message.GameRemovedListMessage(game_id=game.id))
-                        # выкидываем в главное меню - для участников
+                        # для участников: возврат в главное меню
                         await self.manager.limited_broadcast(
                             user_ids=user_ids,
                             message=message.GameRemovedMessage(game_id=game.id),
                         )
                         return
 
-                    # для всех: отразить изменения в GameList (красный либо пустой индикатор)
+                    # для всех: отразить изменения в списке игр (красный либо пустой индикатор)
                     await self.manager.broadcast(message=message.UpdateGameInListMessage(game=game_schema))
-                    # для участников: отразить изменения в playerBlock (красный либо пустой блок, зависит от результата)
+                    # для участников: отразить изменения на экране игры
                     await self.manager.limited_broadcast(
                         user_ids=user_ids,
                         message=message.UpdateGameMessage(game=game_schema),
                     )
 
                     if game_meta.game.state == GameStateEnum.finished:
-                        # отображаем результат участникам
+                        # для участников: отобразить результат
                         verbose_result = game_schema.verbose_result()
                         await self.manager.limited_broadcast(
                             user_ids=user_ids,
@@ -291,7 +295,7 @@ class RenjuWSEndpoint(WebSocketActions):
         except exceptions.NotAPlayer:
             pass
         except Exception as e:
-            raise e
+            raise e     # TODO: log
 
 
 @router.websocket('/renju/ws')

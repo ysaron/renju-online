@@ -9,7 +9,7 @@ from app.config import config
 
 
 async def bulk_create_game_modes(db: AsyncSession):
-    print('Updating game modes...')
+    print('Updating game modes...')     # TODO: print --> log
     data_file = config.BASE_DIR / 'data' / 'game_modes.json'
     with open(data_file, 'r', encoding='utf-8') as f:
         data = json.load(f)

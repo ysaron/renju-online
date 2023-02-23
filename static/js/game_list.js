@@ -197,8 +197,6 @@ function lightUpPlayerIndicators(game, indicatorBlock) {
 }
 
 function joinGameFromParent(event) {
-    console.log("event", event);
-    console.log("target", event.currentTarget);
     let game_id = event.currentTarget.parentNode.dataset.id;
     joinGame(game_id);
 }
@@ -209,7 +207,6 @@ function joinGameByID() {
 }
 
 function joinGame(game_id) {
-    console.log("game_id: ", game_id);
     send({action: "join_game", game_id: game_id});
 }
 
@@ -243,7 +240,5 @@ function updateGameInList(game) {
 function gameRemovedList(game_id) {
     let gameItem = getGameItem(game_id);
     gameItem.style.display = "none";
-
-    console.log("FORGET GAME gameRemovedList");
     forgetGame(game_id);
 }

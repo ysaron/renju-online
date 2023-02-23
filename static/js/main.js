@@ -236,7 +236,6 @@ function getGameStateColor(state) {
 function openWS() {
     let token = getToken();
     ws = new WebSocket(`${wsURL}?querytoken=${token}`);
-    console.log("example", `${wsURL}?querytoken=${token}`)
     setMeOnline();
     wsDispatcher();
 }
@@ -248,7 +247,6 @@ function wsDispatcher() {
 
     ws.onmessage = function (event) {
         let data = JSON.parse(event.data);
-        console.log("data.action", data.action);
         switch (data.action) {
             case "already_connected":
                 showAlreadyConnectedScreen();
@@ -267,7 +265,6 @@ function wsDispatcher() {
             case "player_joined":
                 // отражаем изменения на экране игры (update playerBlock)
                 playerJoined(data.game, data.player_name);
-                console.log("Game: ", data.game);
                 break;
             case "player_joined_list":
                 // отражаем изменения на экране списка игр (индикатор, возможная блокировка кнопки JOIN)
@@ -323,7 +320,6 @@ function wsDispatcher() {
         setMeOffline();
         hideTotalOnline();
         if (event.code == 1008) {
-            console.log(event.code);
             logout();
         }
     }
@@ -381,7 +377,6 @@ function unblockButton(btn) {
 }
 
 function forgetGame(game_id) {
-    console.log("DELETE ", game_id);
     delete currentBoards[game_id];
 }
 

@@ -112,7 +112,6 @@ function updateCurrentRules(rules) {
         withMyself.innerHTML = "With Myself";
         ruleList.appendChild(withMyself);
     }
-
 }
 
 function addMode(event) {

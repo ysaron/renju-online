@@ -64,7 +64,7 @@ class Game(UuidIdMixin, Base):
     # m2m (GameMode)
     modes = relationship('GameMode', secondary=game_mode_m2m, back_populates='games', lazy='selectin')
 
-    # One to many (Move)
+    # One To Many (Move)
     moves = relationship('Move', back_populates='game', lazy='selectin')
 
     time_limit = Column(Integer)
@@ -72,7 +72,6 @@ class Game(UuidIdMixin, Base):
     classic_mode = Column(Boolean, default=False)
     with_myself = Column(Boolean, default=False)
     num_players = Column(Integer, default=2)
-
     board = Column(String)
 
 
@@ -103,13 +102,9 @@ class GameMode(Base):
 class Move(Base):
     id = Column(Integer, primary_key=True)
 
-    # Many to One (Game)
+    # Many To One (Game)
     game_id = Column(psql.UUID(as_uuid=True), ForeignKey('game.id', ondelete='CASCADE'))
     game = relationship('Game', back_populates='moves', lazy='selectin')
-
-    # # Many to One (User)
-    # player_id = Column(psql.UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE'))
-    # player = relationship('User', back_populates='moves', lazy='selectin')
 
     role = Column(
         Enum(PlayerRoleEnum, values_callable=lambda obj: [e.value for e in obj]),

@@ -19,7 +19,7 @@ class UserService:
         self.__db = db_session
 
     async def user_exists(self, user_data: UserCreate) -> bool:
-        """ Check if user with this username or email exists """
+        """ Проверка, существует ли пользователь с данными ``username`` или ``email`` """
         stmt = select(User.id).where(or_(
             User.name == user_data.name,
             User.email == user_data.email,
@@ -39,8 +39,8 @@ class UserService:
 
     async def create_user(self, user_data: UserCreate) -> User:
         """
-        :return: User ORM instance
-        :raise UserAlreadyExists: if user already exists
+        :return: ORM-объект пользователя
+        :raise UserAlreadyExists: если такой пользователь уже существует
         """
         validate_password(user_data)
 
@@ -86,9 +86,9 @@ class UserService:
 
     async def verify_user(self, token: str) -> None:
         """
-        Set ``user.is_verified = True`` if JWT is valid and user exists
+        Установка флага ``user.is_verified = True`` если JWT валидный и пользователь существует
 
-        :param token: JWT containing user_id
+        :param token: JWT, содержащий user_id
         :return: None
         :raise JWTDecodeError:
         :raise UserNotExists:
@@ -108,10 +108,7 @@ class UserService:
 
     async def login(self, email: EmailStr, password: str) -> TokenResponse:
         """
-
-        :param email:
-        :param password:
-        :return:
+        :return: access_token для аутентифицированного пользователя
         :raise UserNotExists:
         :raise UserNotVerified:
         :raise BadCredentials:
@@ -132,7 +129,7 @@ class UserService:
         return TokenResponse(access_token=access_token, token_type='bearer')
 
     async def forgot_password(self, email: EmailStr) -> None:
-        """ Send token for changing password if the corresponding user exists """
+        """ Отправляет токен для смены пароля, если соотв. пользователь существует """
         user = await self.get_user_by_email(email)
         if user is not None:
             token = generate_jwt(

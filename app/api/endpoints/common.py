@@ -4,8 +4,6 @@ from app.core.db.deps import AsyncSession, get_async_session
 from app.models.user import User
 from app.schemas.game import (
     GameModeInGameSchema,
-    GameCreateSchema,
-    GameFullSchema,
     GameSchemaOut,
     GameRules,
     ModesAndRules,
@@ -59,6 +57,5 @@ async def read_my_finished_games(
         user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_async_session),
 ):
-    # --- Возвращаем все Game с state=finished, user in get_players(game)
-    # --- response_model=list[GameFinishedListSchema] ---
+    # TODO: Вернуть все Game с state=finished, user in get_players(game) ---
     return {'hello': f'Hi, {user.name}', 'resp': f'You are not finished any game yet'}

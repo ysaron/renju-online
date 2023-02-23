@@ -18,8 +18,6 @@ function updateCurrentGames(game) {
 }
 
 function openGame(game, my_role) {
-    console.log("game:", game);
-    console.log("me:", my_role);
     hideAllScreens();
     screenGame.style.display = "flex";
 
@@ -36,18 +34,15 @@ function openGame(game, my_role) {
     showPlayersSection(game);
     renderPlayers(game);
     renderControls(game, my_role);
-    console.log("OpenGame ", currentBoards);
     hideLoader();
 }
 
 function playerJoined(game, playerName) {
-    console.log(`${playerName} joined!`);
     renderPlayers(game);
     updateCurrentGames(game);
 }
 
 function playerReady(game, playerName, playerRole) {
-    console.log(`${playerName} ready!`);
     if (playerName == sessionStorage.getItem('username')) {
         btnLeave.innerHTML = "Concede";
         btnLeave.classList.add("btn-concede");
@@ -61,7 +56,6 @@ function spectatorJoined(game) {
 }
 
 function playerLeft(game, playerName) {
-    console.log(`${playerName} left...`);
     updateCurrentGames(game);
 }
 
@@ -70,7 +64,6 @@ function spectatorLeft(game) {
 }
 
 function buildBoard(game) {
-    console.log(currentBoards);
     // game.board: 2D Array 15х15 or 30х30
     clearBoard();
     let cellsArr = [];
@@ -236,14 +229,11 @@ function hideActiveGameMarker() {
 function gameStarted(game) {
     showActiveGameMarker(currentBoards[game.id].role);
     renderPlayers(game);
-    console.log("Game started");
-    console.log(game);
     updateCurrentGames(game);
 }
 
 function unblockBoard(game_id) {
     currentBoards[game_id].allow_moves = true;
-    console.log("YOUR TURN!");
 }
 
 function blockBoard(game_id) {
@@ -253,12 +243,10 @@ function blockBoard(game_id) {
 function gameRemoved(game_id) {
     alert("This game has been removed.");
     showMainScreen();
-    console.log("FORGET GAME gameRemoved");
     forgetGame(game_id);
 }
 
 function updateGame(game) {
-    console.log("The game has been updated. Re-render players...");
     renderPlayers(game);
     updateCurrentGames(game);
 }
@@ -268,7 +256,6 @@ function leaveGame(event) {
 }
 
 function leftGame(game) {
-    console.log("FORGET GAME leftGame");
     forgetGame(game.id);
     showMainScreen();
 }
@@ -317,8 +304,6 @@ function gameFinished(game, verboseResult, winningCellsCoords) {
     renderPlayers(game);
     highlightWinningCells(winningCellsCoords);
     alert(`The game has been finished. ${verboseResult}`);
-    console.log("FORGET GAME gameFinished");
-    console.log(winningCellsCoords);
     btnLeave.classList.remove("btn-concede");
     forgetGame(game.id);
     showMainScreen();
@@ -349,17 +334,14 @@ function cellClicked(event) {
     blockBoard(game_id);
     let x = event.target.dataset.x;
     let y = event.target.dataset.y;
-    console.log(`Click! x${x}-y${y}`);
     send({action: "move", game_id: game_id, x: x, y: y});
 }
 
 function renderMove(game, move) {
-    console.log("renderMove ", currentBoards);
     updateCurrentGames(game);
     let cell = getCell(move.x, move.y);
     let chip = document.createElement("div");
     let color;
-    console.log("move.role ", move.role);
     switch (move.role) {
         case "1":
             color = "white";

@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, Awaitable, Protocol
+from typing import Any, Awaitable, Protocol
 from abc import ABCMeta, abstractmethod
 
 from fastapi import WebSocket
@@ -16,25 +16,30 @@ class ConnDataAwaitable(Protocol):
 
 
 class WebSocketEndpoint:
+    """
+    Базовый класс для обработки взаимодействий по вебсокетам.
+    Реализован по мотивам соотв. класса в Starlette
+    """
+
     __metaclass__ = ABCMeta
-    encoding: str | None = None     # "text", "bytes", or "json".
+    encoding: str | None = None     # "text", "bytes", или "json".
 
     @abstractmethod
     async def dispatch(self, websocket: WebSocket, user: User | None = None) -> None:
-        """ Override to handle websocket interactions """
+        """ Переопределить для обработки взаимодействий по вебсокету """
 
     @abstractmethod
     async def on_connect(self, connection: WSConnection) -> None:
-        """ Override to handle an incoming websocket connection """
+        """ Переопределить для обработки входящего соединения по вебсокету """
         await connection.websocket.accept()
 
     @abstractmethod
     async def on_receive(self, connection: WSConnection, data: Any) -> None:
-        """ Override to handle an incoming websocket message """
+        """ Переопределить для обработки входящего сообщения по вебсокету """
 
     @abstractmethod
     async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:
-        """ Override to handle a disconnecting websocket """
+        """ Переопределить для обработки отключения вебсокета """
 
     async def decode(self, websocket: WebSocket, message: Message) -> Any:
         if self.encoding == "text":
@@ -82,7 +87,7 @@ class WebSocketActions(WebSocketEndpoint):
         close_code = status.WS_1000_NORMAL_CLOSURE
         try:
             while True:
-                if user is None:    # If unauthorized
+                if user is None:    # (не авторизован)
                     close_code = status.WS_1008_POLICY_VIOLATION
                     await connection.websocket.close(close_code, reason='UNAUTHORIZED')
                     break
@@ -113,8 +118,8 @@ class WebSocketActions(WebSocketEndpoint):
         await self.update_total_online()
 
     async def on_receive(self, connection: WSConnection, data: Any) -> None:
+        """ Вызывает соотв. обработчик в зависимости от ключа ``action`` """
         handler: ConnDataAwaitable = getattr(self, data['action'], self.action_not_allowed)
-        print(f'{data["action"] = }')
         return await handler(connection=connection, data=data)
 
     async def on_disconnect(self, connection: WSConnection, close_code: int) -> None:

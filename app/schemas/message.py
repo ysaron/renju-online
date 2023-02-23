@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .game import GameSchemaOut, MoveSchema
 from app.enums.game import PlayerRoleEnum
